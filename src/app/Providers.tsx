@@ -7,7 +7,6 @@ import { applyTheme } from "../themes/osThemes";
 export function Providers({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Sync theme changes
   useEffect(() => {
     applyTheme(state.osIndex);
   }, [state.osIndex]);

@@ -1,7 +1,7 @@
 export interface ThemeTokens {
   // Core
   bg: string;
-  wallpaper: string; // New wallpaper token
+  wallpaper: string;
   text: string;
   taskbarBg: string;
   accent: string;
@@ -53,7 +53,7 @@ export const osThemes: OSTheme[] = [
       bg: "#008080",
       wallpaper: "url('/assets/win98/wallpaper.avif')",
       text: "#000000",
-      taskbarBg: "#c0c0c0",
+      taskbarBg: "linear-gradient(to bottom, #c0c0c0, #c0c0c0)",
       accent: "#000080",
       windowBorder: "#c0c0c0",
       font: '"Win98", sans-serif',
@@ -87,7 +87,9 @@ export const osThemes: OSTheme[] = [
       bg: "#293955",
       wallpaper: "url('/assets/winxp/wallpaper.avif')",
       text: "#000000",
-      taskbarBg: "#245edb",
+      // Provided Gradient
+      taskbarBg:
+        "linear-gradient(rgb(31, 47, 134) 0px, rgb(49, 101, 196) 3%, rgb(54, 130, 229) 6%, rgb(68, 144, 230) 10%, rgb(56, 131, 229) 12%, rgb(43, 113, 224) 15%, rgb(38, 99, 218) 18%, rgb(35, 91, 214) 20%, rgb(34, 88, 213) 23%, rgb(33, 87, 214) 38%, rgb(36, 93, 219) 54%, rgb(37, 98, 223) 86%, rgb(36, 95, 220) 89%, rgb(33, 88, 212) 92%, rgb(29, 78, 192) 95%, rgb(25, 65, 165) 98%)",
       accent: "#3d9e3d",
       windowBorder: "#0058ee",
       font: '"WinXP", "Tahoma", sans-serif',
@@ -121,7 +123,8 @@ export const osThemes: OSTheme[] = [
       bg: "#1e1e1e",
       wallpaper: "url('/assets/win7/wallpaper.avif')",
       text: "#000000",
-      taskbarBg: "rgba(23, 23, 23, 0.85)", // Glass-like
+      taskbarBg:
+        "linear-gradient(to bottom, rgba(23, 23, 23, 0.85), rgba(23, 23, 23, 0.85))", // Glass-like shim
       accent: "#4593ce",
       windowBorder: "rgba(0, 0, 0, 0.4)",
       font: '"Win7", "Segoe UI", sans-serif',
@@ -156,7 +159,7 @@ export const osThemes: OSTheme[] = [
         bg: "#f0f0f0",
         wallpaper: "url('/assets/win10/wallpaper.avif')",
         text: "#000000",
-        taskbarBg: "#e5e5e5",
+        taskbarBg: "linear-gradient(#e5e5e5, #e5e5e5)",
         accent: "#0078d7",
         windowBorder: "#d9d9d9",
         font: '"Win10", "Segoe UI", sans-serif',
@@ -184,7 +187,7 @@ export const osThemes: OSTheme[] = [
         bg: "#1f1f1f",
         wallpaper: "url('/assets/win10/wallpaper.avif')",
         text: "#ffffff",
-        taskbarBg: "#101010",
+        taskbarBg: "linear-gradient(#101010, #101010)",
         accent: "#0078d7",
         windowBorder: "#333333",
         font: '"Win10", "Segoe UI", sans-serif',
@@ -206,36 +209,6 @@ export const osThemes: OSTheme[] = [
         hilightText: "#ffffff",
         grayText: "#666666",
       },
-    },
-  },
-  // 4 - Windows 11
-  {
-    name: "Windows 11",
-    tokens: {
-      bg: "#f3f3f3",
-      wallpaper: "url('/assets/win11/wallpaper.avif')",
-      text: "#1a1a1a",
-      taskbarBg: "#ffffff",
-      accent: "#0067c0",
-      windowBorder: "#e5e5e5",
-      font: '"Win11", "Segoe UI", sans-serif',
-      buttonFace: "#ffffff",
-      buttonHilight: "#f9f9f9",
-      buttonShadow: "#e0e0e0",
-      buttonDkShadow: "#d0d0d0",
-      buttonLight: "#f9f9f9",
-      buttonText: "#1a1a1a",
-      activeTitle: "#ffffff",
-      activeTitleText: "#1a1a1a",
-      gradientActiveTitle: "#ffffff",
-      inactiveTitle: "#ffffff",
-      inactiveTitleText: "#8a8a8a",
-      gradientInactiveTitle: "#ffffff",
-      menu: "#ffffff",
-      menuText: "#1a1a1a",
-      hilight: "#0067c0",
-      hilightText: "#ffffff",
-      grayText: "#8a8a8a",
     },
   },
 ];

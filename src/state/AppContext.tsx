@@ -19,6 +19,22 @@ export interface Stroke {
   size: number;
 }
 
+export interface MenuItem {
+  label: string;
+  action?: () => void;
+  disabled?: boolean;
+  shortcut?: string;
+  separator?: boolean;
+  submenu?: MenuItem[];
+}
+
+export interface ContextMenuState {
+  isOpen: boolean;
+  x: number;
+  y: number;
+  items: MenuItem[];
+}
+
 export interface WindowState {
   id: string;
   x: number;
@@ -37,11 +53,24 @@ export interface WindowState {
   };
 }
 
+export interface DesktopIconState {
+  id: string;
+  x: number;
+  y: number;
+  gridX?: number;
+  gridY?: number;
+}
+
 export interface AppState {
   osIndex: number;
+  startMenuOpen: boolean;
   windows: WindowState[];
   notepad: { text: string };
   paint: { strokes: Stroke[] };
+  contextMenu: ContextMenuState;
+  icons: DesktopIconState[];
+  recycleBinFilled: boolean;
+  autoArrange: boolean;
 }
 
 // --------------------------------------------------
@@ -50,6 +79,8 @@ export interface AppState {
 
 export type Action =
   | { type: "SET_OS"; payload: number }
+  | { type: "TOGGLE_START_MENU" }
+  | { type: "CLOSE_START_MENU" }
   | { type: "ADD_WINDOW"; payload: WindowState }
   | { type: "UPDATE_WINDOW"; payload: Partial<WindowState> & { id: string } }
   | { type: "REMOVE_WINDOW"; payload: string }
@@ -58,7 +89,15 @@ export type Action =
   | { type: "MAXIMIZE_WINDOW"; payload: string }
   | { type: "UNMAXIMIZE_WINDOW"; payload: string }
   | { type: "SET_NOTEPAD_TEXT"; payload: string }
-  | { type: "SET_PAINT_STROKES"; payload: Stroke[] };
+  | { type: "SET_PAINT_STROKES"; payload: Stroke[] }
+  | {
+      type: "OPEN_CONTEXT_MENU";
+      payload: { x: number; y: number; items: MenuItem[] };
+    }
+  | { type: "CLOSE_CONTEXT_MENU" }
+  | { type: "UPDATE_ICON_POS"; payload: { id: string; x: number; y: number } }
+  | { type: "SET_AUTO_ARRANGE"; payload: boolean }
+  | { type: "EMPTY_RECYCLE_BIN" };
 
 // --------------------------------------------------
 // REDUCER
@@ -66,15 +105,33 @@ export type Action =
 
 export const initialState: AppState = {
   osIndex: 3, // Defaulting to Windows 10
+  startMenuOpen: false,
   windows: [],
   notepad: { text: "" },
   paint: { strokes: [] },
+  contextMenu: { isOpen: false, x: 0, y: 0, items: [] },
+  icons: [
+    { id: "computer", x: 10, y: 10 },
+    { id: "recycle", x: 10, y: 100 },
+  ],
+  recycleBinFilled: true,
+  autoArrange: true,
 };
 
 export const appReducer = (state: AppState, action: Action): AppState => {
   switch (action.type) {
     case "SET_OS":
       return { ...state, osIndex: action.payload };
+
+    case "TOGGLE_START_MENU":
+      return {
+        ...state,
+        startMenuOpen: !state.startMenuOpen,
+        contextMenu: { ...state.contextMenu, isOpen: false },
+      };
+
+    case "CLOSE_START_MENU":
+      return { ...state, startMenuOpen: false };
 
     case "ADD_WINDOW":
       return { ...state, windows: [...state.windows, action.payload] };
@@ -194,6 +251,39 @@ export const appReducer = (state: AppState, action: Action): AppState => {
     case "SET_PAINT_STROKES":
       return { ...state, paint: { ...state.paint, strokes: action.payload } };
 
+    case "OPEN_CONTEXT_MENU":
+      return {
+        ...state,
+        contextMenu: {
+          isOpen: true,
+          x: action.payload.x,
+          y: action.payload.y,
+          items: action.payload.items,
+        },
+      };
+
+    case "CLOSE_CONTEXT_MENU":
+      return {
+        ...state,
+        contextMenu: { ...state.contextMenu, isOpen: false },
+      };
+
+    case "UPDATE_ICON_POS":
+      return {
+        ...state,
+        icons: state.icons.map((icon) =>
+          icon.id === action.payload.id
+            ? { ...icon, x: action.payload.x, y: action.payload.y }
+            : icon,
+        ),
+      };
+
+    case "SET_AUTO_ARRANGE":
+      return { ...state, autoArrange: action.payload };
+
+    case "EMPTY_RECYCLE_BIN":
+      return { ...state, recycleBinFilled: false };
+
     default:
       return state;
   }
@@ -216,4 +306,20 @@ export const useAppContext = () => {
     throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
+};
+
+// Provider Component (Required for layout)
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(appReducer, initialState);
+
+  // Apply theme side-effect
+  useEffect(() => {
+    applyTheme(state.osIndex);
+  }, [state.osIndex]);
+
+  return (
+    <AppContext.Provider value={{ state, dispatch }}>
+      {children}
+    </AppContext.Provider>
+  );
 };

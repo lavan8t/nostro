@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Rnd } from "react-rnd";
-import { useAppContext, WindowState } from "../state/AppContext";
-import styles from "./WindowFrame.module.css";
+import { useAppContext, WindowState, MenuItem } from "../state/AppContext";
+import { Icons } from "./Icons";
 
 // --------------------------------------------------
 // TYPES
@@ -26,81 +26,185 @@ type SnapType =
   | "bottom-right"
   | null;
 
+interface WindowFrameProps {
+  win: WindowState;
+  children: React.ReactNode;
+  viewportSize: { width: number; height: number };
+  onSnapHover: (rect: SnapRect | null) => void;
+  menuItems?: MenuItem[];
+}
+
+// --------------------------------------------------
+// HELPER: Title
+// --------------------------------------------------
+
+const getWindowTitle = (id: string) => {
+  if (id.includes("notepad")) return "Untitled - Notepad";
+  if (id.includes("paint")) return "Untitled - Paint";
+  if (id.includes("terminal") || id.includes("cmd")) return "Command Prompt";
+  if (id.includes("internet") || id.includes("browser"))
+    return "Internet Explorer";
+  if (id.includes("explorer")) return "File Explorer";
+  return "Application";
+};
+
+// --------------------------------------------------
+// HELPER: Title Bar Controls
+// --------------------------------------------------
+
+const TitleBarControls = ({
+  osIndex,
+  onMinimize,
+  onMaximize,
+  onClose,
+}: {
+  osIndex: number;
+  onMinimize: (e: React.MouseEvent) => void;
+  onMaximize: (e: React.MouseEvent) => void;
+  onClose: (e: React.MouseEvent) => void;
+}) => {
+  // Win98 / Classic
+  if (osIndex === 0) {
+    return (
+      <div className="flex items-center gap-[2px] mr-[2px]">
+        <button
+          onClick={onMinimize}
+          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)]"
+        >
+          <div className="w-[6px] h-[2px] bg-black mb-[4px]" />
+        </button>
+        <button
+          onClick={onMaximize}
+          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)]"
+        >
+          <div className="w-[9px] h-[8px] border-t-2 border-l-2 border-r border-b border-black" />
+        </button>
+        <button
+          onClick={onClose}
+          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)] ml-[2px]"
+        >
+          <svg viewBox="0 0 10 10" className="w-[8px] h-[8px]">
+            <path d="M1 1L9 9M9 1L1 9" stroke="black" strokeWidth="1.5" />
+          </svg>
+        </button>
+      </div>
+    );
+  }
+
+  // WinXP
+  if (osIndex === 1) {
+    return (
+      <div className="flex items-center gap-1 mr-1">
+        <button
+          onClick={onMinimize}
+          className="w-[21px] h-[21px] bg-[#2963d7] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20"
+        >
+          <div className="w-[8px] h-[2px] bg-white mt-1" />
+        </button>
+        <button
+          onClick={onMaximize}
+          className="w-[21px] h-[21px] bg-[#2963d7] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20"
+        >
+          <div className="w-[10px] h-[8px] border border-white" />
+        </button>
+        <button
+          onClick={onClose}
+          className="w-[21px] h-[21px] bg-[#d73f29] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20 ml-1"
+        >
+          <svg viewBox="0 0 10 10" className="w-[8px] h-[8px]">
+            <path d="M1 1L9 9M9 1L1 9" stroke="white" strokeWidth="2" />
+          </svg>
+        </button>
+      </div>
+    );
+  }
+
+  // Win7 / 10 (Modern)
+  const isWin7 = osIndex === 2;
+  return (
+    <div className={`flex items-center h-full ${isWin7 ? "gap-1 mr-2" : ""}`}>
+      <button
+        onClick={onMinimize}
+        className={`h-full flex items-center justify-center hover:bg-black/10 transition-colors ${isWin7 ? "w-[28px]" : "w-[46px]"}`}
+      >
+        <div className="w-[10px] h-[1px] bg-current" />
+      </button>
+      <button
+        onClick={onMaximize}
+        className={`h-full flex items-center justify-center hover:bg-black/10 transition-colors ${isWin7 ? "w-[28px]" : "w-[46px]"}`}
+      >
+        <div className="w-[10px] h-[10px] border border-current" />
+      </button>
+      <button
+        onClick={onClose}
+        className={`h-full flex items-center justify-center hover:bg-[#e81123] hover:text-white transition-colors ${isWin7 ? "w-[40px] rounded-[3px]" : "w-[46px]"}`}
+      >
+        <svg viewBox="0 0 10 10" className="w-[10px] h-[10px]">
+          <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1" />
+        </svg>
+      </button>
+    </div>
+  );
+};
+
 // --------------------------------------------------
 // COMPONENT
 // --------------------------------------------------
 
 export default function WindowFrame({
   win,
-  onSnapHover,
+  children,
   viewportSize,
-}: {
-  win: WindowState;
-  onSnapHover: (rect: SnapRect | null) => void;
-  viewportSize: { width: number; height: number };
-}) {
+  onSnapHover,
+  menuItems,
+}: WindowFrameProps) {
   const { state, dispatch } = useAppContext();
   const { width: vw, height: vh } = viewportSize;
 
-  // Animation state
-  const [animState, setAnimState] = useState<
-    "entering" | "visible" | "exiting" | "closing"
-  >("entering");
-
-  // Interaction state
-  const [isInteracting, setIsInteracting] = useState(false);
-
-  // Refs
+  // Refs & State
+  const rndRef = useRef<Rnd>(null);
+  const snapTypeRef = useRef<SnapType>(null);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const rafRef1 = useRef<number | null>(null);
-  const rafRef2 = useRef<number | null>(null);
-  const snapTypeRef = useRef<SnapType>(null);
+  const [animState, setAnimState] = useState<
+    "entering" | "visible" | "exiting" | "closing"
+  >("entering");
+  const [isInteracting, setIsInteracting] = useState(false);
 
-  // Check if current theme is Windows 7 (Index 2)
+  // OS Flags
+  const isWin10 = state.osIndex === 3;
   const isWin7 = state.osIndex === 2;
+  const isXP = state.osIndex === 1;
+  const isClassic = state.osIndex === 0;
 
-  // Mount animation
+  // Mount Animation
   useEffect(() => {
     setAnimState("entering");
-    rafRef1.current = requestAnimationFrame(() => {
-      rafRef2.current = requestAnimationFrame(() => {
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => {
         setAnimState("visible");
       });
     });
-
     return () => {
-      if (rafRef1.current) cancelAnimationFrame(rafRef1.current);
-      if (rafRef2.current) cancelAnimationFrame(rafRef2.current);
       if (animationTimeoutRef.current)
         clearTimeout(animationTimeoutRef.current);
     };
   }, []);
 
-  // Focus Logic
-  const handleFocus = () => {
-    const sortedWindows = [...state.windows].sort((a, b) => a.z - b.z);
-    const others = sortedWindows.filter((w) => w.id !== win.id);
-    const newOrder = [...others, win];
-
-    newOrder.forEach((w, index) => {
-      const newZ = index + 1;
-      const shouldBeFocused = w.id === win.id;
-
-      if (w.z !== newZ || w.focused !== shouldBeFocused) {
-        dispatch({
-          type: "UPDATE_WINDOW",
-          payload: { id: w.id, z: newZ, focused: shouldBeFocused },
-        });
-      }
-    });
+  // Actions
+  const activate = () => {
+    if (!win.focused) {
+      dispatch({
+        type: "UPDATE_WINDOW",
+        payload: { id: win.id, z: 0, focused: true },
+      });
+    }
   };
 
   const handleMinimize = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-
     setAnimState("exiting");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "MINIMIZE_WINDOW", payload: win.id });
@@ -109,44 +213,29 @@ export default function WindowFrame({
 
   const handleMaximizeToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (win.maximized) {
-      dispatch({ type: "UNMAXIMIZE_WINDOW", payload: win.id });
-    } else {
-      dispatch({ type: "MAXIMIZE_WINDOW", payload: win.id });
-    }
+    win.maximized
+      ? dispatch({ type: "UNMAXIMIZE_WINDOW", payload: win.id })
+      : dispatch({ type: "MAXIMIZE_WINDOW", payload: win.id });
   };
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
-
     setAnimState("closing");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "REMOVE_WINDOW", payload: win.id });
     }, 300);
   };
 
-  const handleDragStart = () => {
-    setIsInteracting(true);
-    handleFocus();
-  };
-
-  const handleResizeStart = () => {
-    setIsInteracting(true);
-    handleFocus();
-  };
-
+  // Drag & Snap Logic
   const handleDrag = (e: any, d: any) => {
-    // Maximize pull-down
     if (win.maximized) {
       if (d.y > 20) {
         const restoredWidth = win.width;
-        const mouseX = e.clientX;
-        let newX = mouseX - restoredWidth / 2;
-        const minX = -(restoredWidth - 10);
-        const maxX = vw - 10;
-        newX = Math.max(minX, Math.min(newX, maxX));
-
+        const newX = Math.max(
+          -(restoredWidth - 10),
+          Math.min(e.clientX - restoredWidth / 2, vw - 10),
+        );
         dispatch({ type: "UNMAXIMIZE_WINDOW", payload: win.id });
         dispatch({
           type: "UPDATE_WINDOW",
@@ -156,46 +245,38 @@ export default function WindowFrame({
       return;
     }
 
-    // Snap Detection
     const mouseX = e.clientX;
     const mouseY = e.clientY;
-    const EDGE_THRESHOLD = 20;
-    const TOP_THRESHOLD = 10;
-    const BOTTOM_THRESHOLD = 20;
     const taskbarHeight = 40;
     const workHeight = vh - taskbarHeight;
+    const EDGE = 20;
 
-    let newSnapType: SnapType = null;
-    let previewRect: SnapRect | null = null;
+    let newSnap: SnapType = null;
+    let preview: SnapRect | null = null;
 
-    if (mouseY < TOP_THRESHOLD) {
-      if (mouseX < EDGE_THRESHOLD) {
-        newSnapType = "top-left";
-        previewRect = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
-      } else if (mouseX > vw - EDGE_THRESHOLD) {
-        newSnapType = "top-right";
-        previewRect = {
-          x: vw / 2,
-          y: 0,
-          width: vw / 2,
-          height: workHeight / 2,
-        };
+    if (mouseY < 10) {
+      if (mouseX < EDGE) {
+        newSnap = "top-left";
+        preview = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
+      } else if (mouseX > vw - EDGE) {
+        newSnap = "top-right";
+        preview = { x: vw / 2, y: 0, width: vw / 2, height: workHeight / 2 };
       } else {
-        newSnapType = "top";
-        previewRect = { x: 0, y: 0, width: vw, height: workHeight };
+        newSnap = "top";
+        preview = { x: 0, y: 0, width: vw, height: workHeight };
       }
-    } else if (mouseY > workHeight - BOTTOM_THRESHOLD) {
-      if (mouseX < EDGE_THRESHOLD) {
-        newSnapType = "bottom-left";
-        previewRect = {
+    } else if (mouseY > workHeight - EDGE) {
+      if (mouseX < EDGE) {
+        newSnap = "bottom-left";
+        preview = {
           x: 0,
           y: workHeight / 2,
           width: vw / 2,
           height: workHeight / 2,
         };
-      } else if (mouseX > vw - EDGE_THRESHOLD) {
-        newSnapType = "bottom-right";
-        previewRect = {
+      } else if (mouseX > vw - EDGE) {
+        newSnap = "bottom-right";
+        preview = {
           x: vw / 2,
           y: workHeight / 2,
           width: vw / 2,
@@ -203,75 +284,60 @@ export default function WindowFrame({
         };
       }
     } else {
-      if (mouseX < EDGE_THRESHOLD) {
-        newSnapType = "left";
-        previewRect = { x: 0, y: 0, width: vw / 2, height: workHeight };
-      } else if (mouseX > vw - EDGE_THRESHOLD) {
-        newSnapType = "right";
-        previewRect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
+      if (mouseX < EDGE) {
+        newSnap = "left";
+        preview = { x: 0, y: 0, width: vw / 2, height: workHeight };
+      } else if (mouseX > vw - EDGE) {
+        newSnap = "right";
+        preview = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
       }
     }
 
-    if (snapTypeRef.current !== newSnapType) {
-      snapTypeRef.current = newSnapType;
-      onSnapHover(previewRect);
+    if (snapTypeRef.current !== newSnap) {
+      snapTypeRef.current = newSnap;
+      onSnapHover(preview);
     }
   };
 
   const handleDragStop = (e: any, d: any) => {
     setIsInteracting(false);
-
-    const currentSnap = snapTypeRef.current;
-    const taskbarHeight = 40;
-    const workHeight = vh - taskbarHeight;
+    const snap = snapTypeRef.current;
+    const workHeight = vh - 40;
     const maxZ = state.windows.reduce((max, w) => Math.max(max, w.z), 0);
 
-    if (currentSnap) {
-      if (currentSnap === "top") {
+    if (snap) {
+      if (snap === "top") {
         dispatch({ type: "MAXIMIZE_WINDOW", payload: win.id });
       } else {
-        let targetRect = { x: 0, y: 0, width: 0, height: 0 };
-        switch (currentSnap) {
-          case "left":
-            targetRect = { x: 0, y: 0, width: vw / 2, height: workHeight };
-            break;
-          case "right":
-            targetRect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
-            break;
-          case "top-left":
-            targetRect = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
-            break;
-          case "top-right":
-            targetRect = {
-              x: vw / 2,
-              y: 0,
-              width: vw / 2,
-              height: workHeight / 2,
-            };
-            break;
-          case "bottom-left":
-            targetRect = {
-              x: 0,
-              y: workHeight / 2,
-              width: vw / 2,
-              height: workHeight / 2,
-            };
-            break;
-          case "bottom-right":
-            targetRect = {
-              x: vw / 2,
-              y: workHeight / 2,
-              width: vw / 2,
-              height: workHeight / 2,
-            };
-            break;
-        }
+        let rect = { x: 0, y: 0, width: 0, height: 0 };
+        if (snap === "left")
+          rect = { x: 0, y: 0, width: vw / 2, height: workHeight };
+        else if (snap === "right")
+          rect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
+        else if (snap === "top-left")
+          rect = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
+        else if (snap === "top-right")
+          rect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight / 2 };
+        else if (snap === "bottom-left")
+          rect = {
+            x: 0,
+            y: workHeight / 2,
+            width: vw / 2,
+            height: workHeight / 2,
+          };
+        else if (snap === "bottom-right")
+          rect = {
+            x: vw / 2,
+            y: workHeight / 2,
+            width: vw / 2,
+            height: workHeight / 2,
+          };
 
         dispatch({
           type: "UPDATE_WINDOW",
           payload: {
             id: win.id,
-            ...targetRect,
+            ...rect,
             maximized: false,
             focused: true,
             z: maxZ + 1,
@@ -279,251 +345,193 @@ export default function WindowFrame({
         });
       }
     } else {
-      const minX = -(win.width - 10);
-      const maxX = vw - 10;
-      const minY = 0;
-      const maxY = workHeight - 10;
-      const clampedX = Math.max(minX, Math.min(d.x, maxX));
-      const clampedY = Math.max(minY, Math.min(d.y, maxY));
-
       dispatch({
         type: "UPDATE_WINDOW",
-        payload: { id: win.id, x: clampedX, y: clampedY },
+        payload: { id: win.id, x: d.x, y: d.y },
       });
     }
-
     snapTypeRef.current = null;
     onSnapHover(null);
   };
 
-  // Styles
+  // Rendering Styles
   const dropDistance = vh - win.y;
 
-  const getInnerStyles = (): React.CSSProperties => {
-    const baseTransition =
+  const getAnimationStyles = (): React.CSSProperties => {
+    const base =
       "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-in-out";
-    const focusScale = win.focused && !win.maximized ? "scale(1)" : "scale(1)"; // Identity scale
-
-    switch (animState) {
-      case "entering":
-        return {
-          opacity: 0,
-          transform: `scale(0.8) translateY(${dropDistance * 0.2}px)`,
-          transition: baseTransition,
-        };
-      case "visible":
-        return {
-          opacity: 1,
-          transform: `${focusScale} translateY(0)`,
-          transition: baseTransition,
-        };
-      case "exiting":
-        return {
-          opacity: 0,
-          transform: `scale(0.6) translateY(${dropDistance * 0.5}px)`,
-          transformOrigin: "bottom center",
-          transition: baseTransition,
-        };
-      case "closing":
-        return {
-          opacity: 0,
-          transform: "scale(0.9)",
-          transition: "transform 200ms ease-out, opacity 200ms ease-out",
-        };
-    }
+    if (animState === "entering")
+      return {
+        opacity: 0,
+        transform: `scale(0.8) translateY(${dropDistance * 0.2}px)`,
+        transition: base,
+      };
+    if (animState === "exiting")
+      return {
+        opacity: 0,
+        transform: `scale(0.6) translateY(${dropDistance * 0.5}px)`,
+        transformOrigin: "bottom center",
+        transition: base,
+      };
+    if (animState === "closing")
+      return {
+        opacity: 0,
+        transform: "scale(0.9)",
+        transition: "transform 200ms ease-out, opacity 200ms ease-out",
+      };
+    return {
+      opacity: 1,
+      transform: "scale(1) translateY(0)",
+      transition: base,
+    };
   };
 
-  const rndTransition = isInteracting
-    ? "none"
-    : "transform 200ms ease-in-out, width 200ms ease-in-out, height 200ms ease-in-out";
+  const titleBarHeight = isClassic ? 18 : 30;
 
-  const position = win.maximized ? { x: 0, y: 0 } : { x: win.x, y: win.y };
-  const size = win.maximized
-    ? { width: vw, height: Math.max(0, vh - 40) }
-    : { width: win.width, height: win.height };
+  const frameStyle: React.CSSProperties = {
+    backgroundColor: "var(--os-bg)",
+    boxShadow: isClassic
+      ? "1px 1px 0 0 black, -1px -1px 0 0 white, inset 1px 1px 0 0 var(--ButtonHilight), inset -1px -1px 0 0 var(--ButtonShadow)"
+      : isXP
+        ? "4px 4px 8px rgba(0,0,0,0.3)"
+        : "0 0 10px rgba(0,0,0,0.3), 0 0 0 1px var(--os-window-border)",
+    border: isClassic
+      ? "2px solid var(--ButtonFace)"
+      : isXP
+        ? "3px solid #0058ee"
+        : isWin7
+          ? "1px solid rgba(0,0,0,0.4)"
+          : "1px solid var(--os-window-border)",
+    borderRadius: isXP ? "4px 4px 0 0" : isWin7 ? "6px" : "0px",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    fontFamily: "var(--os-font)",
+    ...getAnimationStyles(),
+  };
 
-  // Windows 7 Rendering
-  if (isWin7) {
-    return (
-      <Rnd
-        size={size}
-        position={position}
-        style={{ zIndex: win.z, transition: rndTransition }}
-        // Use "title-bar" as the handle class for 7.css, but alias to "window-header" to match logic
-        dragHandleClassName="window-header"
-        disableDragging={false}
-        enableResizing={!win.maximized}
-        onDragStart={handleDragStart}
-        onResizeStart={handleResizeStart}
-        onDrag={handleDrag}
-        onDragStop={handleDragStop}
-        onResizeStop={(e, direction, ref, delta, position) => {
-          setIsInteracting(false);
-          if (!win.maximized) {
-            dispatch({
-              type: "UPDATE_WINDOW",
-              payload: {
-                id: win.id,
-                width: parseInt(ref.style.width),
-                height: parseInt(ref.style.height),
-                ...position,
-              },
-            });
-          }
-        }}
-        onMouseDown={handleFocus}
-      >
-        <div className="win7" style={{ width: "100%", height: "100%" }}>
-          <div
-            className={`window ${win.focused ? "active" : ""}`}
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              ...getInnerStyles(),
-            }}
-          >
-            <div
-              className="title-bar window-header" // "window-header" for drag handle
-              onDoubleClick={handleMaximizeToggle}
-            >
-              <div className="title-bar-text">{win.id}</div>
-              <div className="title-bar-controls">
-                <button
-                  aria-label="Minimize"
-                  onClick={handleMinimize}
-                  onMouseDown={(e) => e.stopPropagation()}
-                ></button>
-                <button
-                  aria-label={win.maximized ? "Restore" : "Maximize"}
-                  onClick={handleMaximizeToggle}
-                  onMouseDown={(e) => e.stopPropagation()}
-                ></button>
-                <button
-                  aria-label="Close"
-                  onClick={handleClose}
-                  onMouseDown={(e) => e.stopPropagation()}
-                ></button>
-              </div>
-            </div>
-
-            {/* 7.css window-body normally expects P tag, we force it to act as container */}
-            <div
-              className="window-body"
-              style={{
-                flex: 1,
-                margin: 0,
-                padding: 0,
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{ flex: 1, backgroundColor: "#fff", overflow: "auto" }}
-              >
-                {/* Content */}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Rnd>
-    );
-  }
-
-  // Default / Windows 98 Rendering
   return (
     <Rnd
-      size={size}
-      position={position}
-      style={{ zIndex: win.z, transition: rndTransition }}
-      dragHandleClassName="window-header"
-      disableDragging={false}
-      enableResizing={!win.maximized}
-      onDragStart={handleDragStart}
-      onResizeStart={handleResizeStart}
-      onDrag={handleDrag}
+      ref={rndRef}
+      size={
+        win.maximized
+          ? { width: vw, height: Math.max(0, vh - 40) }
+          : { width: win.width, height: win.height }
+      }
+      position={win.maximized ? { x: 0, y: 0 } : { x: win.x, y: win.y }}
+      onDragStart={() => {
+        setIsInteracting(true);
+        activate();
+      }}
       onDragStop={handleDragStop}
-      onResizeStop={(e, direction, ref, delta, position) => {
+      onDrag={handleDrag}
+      onResizeStart={() => {
+        setIsInteracting(true);
+        activate();
+      }}
+      onResizeStop={(e, dir, ref, d, pos) => {
         setIsInteracting(false);
-        if (!win.maximized) {
+        if (!win.maximized)
           dispatch({
             type: "UPDATE_WINDOW",
             payload: {
               id: win.id,
               width: parseInt(ref.style.width),
               height: parseInt(ref.style.height),
-              ...position,
+              ...pos,
             },
           });
-        }
       }}
-      onMouseDown={handleFocus}
+      dragHandleClassName="window-titlebar"
+      minWidth={200}
+      minHeight={100}
+      bounds="parent"
+      style={{
+        zIndex: win.z,
+        display: win.minimized ? "none" : "flex",
+        ...frameStyle,
+      }}
+      className={!isInteracting ? "transition-all duration-75" : ""}
+      disableDragging={win.maximized}
+      enableResizing={!win.maximized}
+      onMouseDown={activate}
     >
+      {/* TITLE BAR */}
       <div
-        className={`${styles.window} ${win.maximized ? styles.maximized : ""}`}
-        style={getInnerStyles()}
+        className="window-titlebar flex items-center justify-between select-none overflow-hidden shrink-0"
+        onDoubleClick={handleMaximizeToggle}
+        style={{
+          height: titleBarHeight,
+          background: win.focused ? "var(--os-accent)" : "var(--InactiveTitle)",
+          backgroundImage: isClassic
+            ? win.focused
+              ? "linear-gradient(to right, var(--ActiveTitle), var(--GradientActiveTitle))"
+              : "linear-gradient(to right, var(--InactiveTitle), var(--GradientInactiveTitle))"
+            : isXP
+              ? win.focused
+                ? "linear-gradient(to bottom, #0058ee 0%, #3b80f5 10%, #0058ee 100%)"
+                : "linear-gradient(to bottom, #7695ce 0%, #8da3d3 100%)"
+              : isWin7
+                ? "linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0) 100%)"
+                : undefined,
+          color: win.focused
+            ? "var(--ActiveTitleText)"
+            : "var(--InactiveTitleText)",
+          paddingLeft: "4px",
+          borderBottom: isWin7 ? "1px solid rgba(0,0,0,0.1)" : "none",
+        }}
       >
+        <div className="flex items-center gap-2 pl-1 truncate">
+          {/* App Icon */}
+          <div className="w-4 h-4 text-current opacity-90">
+            <Icons.App />
+          </div>
+          <span
+            className="text-xs font-bold truncate"
+            style={{
+              textShadow: isXP || isWin7 ? "0 0 2px rgba(0,0,0,0.5)" : "none",
+            }}
+          >
+            {getWindowTitle(win.id)}
+          </span>
+        </div>
+
+        <TitleBarControls
+          osIndex={state.osIndex}
+          onMinimize={handleMinimize}
+          onMaximize={handleMaximizeToggle}
+          onClose={handleClose}
+        />
+      </div>
+
+      {/* MENU BAR (Classic/Default only) */}
+      {(menuItems || isClassic) && (
         <div
-          className={`window-header ${styles.titleBar} ${!win.focused ? styles.titleBarInactive : ""}`}
-          onDoubleClick={handleMaximizeToggle}
+          className="flex items-center px-1 bg-[var(--Menu)] text-[var(--MenuText)] border-b border-[var(--ButtonShadow)] h-[20px] select-none text-[11px]"
+          style={{ display: isClassic ? "flex" : "none" }}
         >
-          {/* Icon */}
-          <div className={styles.titleIcon}>
-            <div className="w-3 h-3 bg-white/30" />
-          </div>
-
-          <span className={styles.titleText}>{win.id}</span>
-
-          <div className={styles.controls}>
+          {(
+            menuItems || [
+              { label: "File" },
+              { label: "Edit" },
+              { label: "View" },
+              { label: "Help" },
+            ]
+          ).map((item, idx) => (
             <button
-              onClick={handleMinimize}
-              className={styles.button}
-              aria-label="Minimize"
-              onMouseDown={(e) => e.stopPropagation()}
+              key={idx}
+              className="px-2 hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] disabled:text-[var(--GrayText)]"
+              onClick={item.action}
             >
-              <div className={`${styles.icon} ${styles.iconMinimize}`} />
+              {item.label}
             </button>
-            <button
-              onClick={handleMaximizeToggle}
-              className={styles.button}
-              aria-label="Maximize"
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <div
-                className={`${styles.icon} ${win.maximized ? styles.iconRestore : styles.iconMaximize}`}
-              />
-            </button>
-            <button
-              onClick={handleClose}
-              className={styles.button}
-              aria-label="Close"
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <div className={`${styles.icon} ${styles.iconClose}`} />
-            </button>
-          </div>
+          ))}
         </div>
+      )}
 
-        <div className={styles.menuBar}>
-          <div className={styles.menuItem}>
-            <span className={styles.hotkey}>F</span>ile
-          </div>
-          <div className={styles.menuItem}>
-            <span className={styles.hotkey}>E</span>dit
-          </div>
-          <div className={styles.menuItem}>
-            <span className={styles.hotkey}>V</span>iew
-          </div>
-          <div className={styles.menuItem}>
-            <span className={styles.hotkey}>H</span>elp
-          </div>
-        </div>
-
-        <div className={styles.content}>
-          {/* Content will be injected here later */}
-        </div>
+      {/* CONTENT AREA */}
+      <div className="flex-1 overflow-auto bg-[var(--os-bg)] text-[var(--os-text)] relative">
+        {children}
       </div>
     </Rnd>
   );

@@ -7,98 +7,93 @@ import { osThemes, ThemeTokens } from "../themes/osThemes";
 export default function ThemeCrossfade() {
   const { state } = useAppContext();
 
-  // Track previous index to determine when to trigger animation
-  const prevOsIndexRef = useRef<number>(state.osIndex);
-
-  // State to manage the transition lifecycle
-  const [animating, setAnimating] = useState(false);
-  const [indices, setIndices] = useState<{ prev: number; next: number } | null>(
-    null,
-  );
-  const [triggerFade, setTriggerFade] = useState(false);
-
-  // Helper to safely extract tokens (defaulting to Dark for Win10/Dual themes)
-  const getTokens = (index: number): ThemeTokens => {
-    const theme = osThemes[index] || osThemes[3];
-    if ("light" in theme && "dark" in theme) {
-      return theme.dark.tokens;
-    }
-    // @ts-ignore - We know it's a SingleTheme if not Dual
-    return theme.tokens;
-  };
+  // State to manage the visual layers
+  // We deliberately do NOT sync this with state.osIndex immediately to allow animation
+  const [currentLayerIndex, setCurrentLayerIndex] = useState(state.osIndex);
+  const [nextLayerIndex, setNextLayerIndex] = useState<number | null>(null);
+  const [opacity, setOpacity] = useState(0); // 0 means current is visible, 1 means next is visible
 
   useEffect(() => {
-    if (prevOsIndexRef.current !== state.osIndex) {
-      const fromIndex = prevOsIndexRef.current;
-      const toIndex = state.osIndex;
+    // If the requested OS index is different from what we are currently showing...
+    if (state.osIndex !== currentLayerIndex) {
+      // If we are already animating to a target, and the target changes,
+      // we ideally want to just jump to the new target or finish the old one.
+      // Simplified robust approach:
+      // 1. Set the 'Next' layer to the new target.
+      // 2. Fade it in.
+      // 3. When done, swap 'Next' to 'Current' and reset.
 
-      // 1. Prepare animation state
-      setIndices({ prev: fromIndex, next: toIndex });
-      setAnimating(true);
-      setTriggerFade(false); // Reset fade trigger
+      setNextLayerIndex(state.osIndex);
 
-      // 2. Trigger the CSS transition (next tick)
+      // Small timeout to ensure DOM has rendered the new background image in the 'next' div
+      // before we start fading opacity.
       const raf = requestAnimationFrame(() => {
-        setTriggerFade(true);
+        const raf2 = requestAnimationFrame(() => {
+          setOpacity(1);
+        });
       });
 
-      // 3. Cleanup after transition completes (600ms)
-      const timer = setTimeout(() => {
-        setAnimating(false);
-        setIndices(null);
-        setTriggerFade(false);
-      }, 600);
-
-      // Update ref
-      prevOsIndexRef.current = state.osIndex;
+      const timeout = setTimeout(() => {
+        // Animation Complete
+        setCurrentLayerIndex(state.osIndex);
+        setNextLayerIndex(null);
+        setOpacity(0);
+      }, 600); // Matches duration-600
 
       return () => {
-        cancelAnimationFrame(raf);
-        clearTimeout(timer);
+        clearTimeout(timeout);
+        // We do NOT cancel the animation frame logic aggressively to avoid stutter
       };
     }
-  }, [state.osIndex]);
+  }, [state.osIndex, currentLayerIndex]);
 
-  if (!animating || !indices) return null;
+  const getWallpaper = (index: number | null) => {
+    if (index === null) return "none";
+    const safeIndex = osThemes[index] ? index : 3;
+    const theme = osThemes[safeIndex];
+    // Handle dual/single theme structure
+    const tokens =
+      "light" in theme && "dark" in theme
+        ? theme.dark.tokens
+        : (theme as any).tokens;
+    return tokens.wallpaper;
+  };
 
-  const prevTokens = getTokens(indices.prev);
-  const nextTokens = getTokens(indices.next);
-
-  // Helper to generate inline CSS variables for a specific theme
-  const getStyleVars = (tokens: ThemeTokens) =>
-    ({
-      "--os-bg": tokens.bg,
-      "--os-text": tokens.text,
-      "--os-taskbar-bg": tokens.taskbarBg,
-      "--os-accent": tokens.accent,
-      "--os-window-border": tokens.windowBorder,
-    }) as React.CSSProperties;
+  const layerStyle: React.CSSProperties = {
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    willChange: "opacity",
+  };
 
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-[40px] pointer-events-none overflow-hidden z-0">
-      {/* Previous Theme Overlay: 1 -> 0 */}
+    <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden z-0">
+      {/* Bottom Layer (Current) */}
       <div
-        className={`absolute inset-0 transition-opacity duration-[600ms] ease-in-out ${
-          triggerFade ? "opacity-0" : "opacity-100"
-        }`}
         style={{
-          ...getStyleVars(prevTokens),
-          backgroundColor: "var(--os-bg)",
-          color: "var(--os-text)",
+          ...layerStyle,
+          backgroundImage: getWallpaper(currentLayerIndex),
+          zIndex: 1,
         }}
       />
 
-      {/* New Theme Overlay: 0 -> 1 */}
-      <div
-        className={`absolute inset-0 transition-opacity duration-600 ease-in-out ${
-          triggerFade ? "opacity-100" : "opacity-0"
-        }`}
-        style={{
-          ...getStyleVars(nextTokens),
-          backgroundColor: "var(--os-bg)",
-          color: "var(--os-text)",
-        }}
-      />
+      {/* Top Layer (Next) - Fades In */}
+      {nextLayerIndex !== null && (
+        <div
+          className="transition-opacity duration-600 ease-in-out"
+          style={{
+            ...layerStyle,
+            backgroundImage: getWallpaper(nextLayerIndex),
+            opacity: opacity,
+            zIndex: 2,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,113 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useAppContext, WindowState } from "../state/AppContext";
-import { osThemes } from "../themes/osThemes";
-
-// --------------------------------------------------
-// ICONS
-// --------------------------------------------------
-
-const Icons = {
-  Terminal: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="w-4 h-4"
-    >
-      <polyline points="4 17 10 11 4 5" />
-      <line x1="12" y1="19" x2="20" y2="19" />
-    </svg>
-  ),
-  Browser: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="w-4 h-4"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  ),
-  Notepad: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="w-4 h-4"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </svg>
-  ),
-  Paint: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="w-4 h-4"
-    >
-      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-    </svg>
-  ),
-  Default: () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="w-4 h-4"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-      <line x1="3" y1="9" x2="21" y2="9" />
-    </svg>
-  ),
-};
-
-const getProgramId = (id: string): string => {
-  const parts = id.split("-");
-  if (parts.length >= 2) return parts[1].toLowerCase();
-  return "default";
-};
-
-const getProgramIcon = (programId: string) => {
-  if (programId.includes("terminal") || programId.includes("cmd"))
-    return <Icons.Terminal />;
-  if (
-    programId.includes("browser") ||
-    programId.includes("chrome") ||
-    programId.includes("web")
-  )
-    return <Icons.Browser />;
-  if (
-    programId.includes("notepad") ||
-    programId.includes("editor") ||
-    programId.includes("text")
-  )
-    return <Icons.Notepad />;
-  if (programId.includes("paint") || programId.includes("draw"))
-    return <Icons.Paint />;
-  return <Icons.Default />;
-};
-
-// --------------------------------------------------
-// COMPONENT
-// --------------------------------------------------
+import StartMenu from "./StartMenu";
+import {
+  getProgramId,
+  getProgramIcon,
+  getTaskbarButtonStyle,
+} from "../utils/TaskbarUtils";
 
 export default function Taskbar() {
   const { state, dispatch } = useAppContext();
+  const startButtonRef = useRef<HTMLButtonElement>(null);
+  const [time, setTime] = useState("");
+  const scrollAccumulator = useRef(0);
+  const lastSwitchTime = useRef(0);
+  const localOsIndex = useRef(state.osIndex);
 
-  // Group windows
+  useEffect(() => {
+    localOsIndex.current = state.osIndex;
+  }, [state.osIndex]);
+
+  useEffect(() => {
+    const updateTime = () =>
+      setTime(
+        new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const groupedWindows = state.windows.reduce(
     (acc, win) => {
       const pId = getProgramId(win.id);
@@ -118,11 +44,24 @@ export default function Taskbar() {
     {} as Record<string, WindowState[]>,
   );
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        state.startMenuOpen &&
+        startButtonRef.current &&
+        !startButtonRef.current.contains(event.target as Node) &&
+        !(event.target as Element).closest(".start-menu-container")
+      ) {
+        dispatch({ type: "CLOSE_START_MENU" });
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [state.startMenuOpen, dispatch]);
+
   const handleProgramClick = (programId: string) => {
     const windows = groupedWindows[programId];
     if (!windows || windows.length === 0) return;
-
-    // Logic to toggle/raise window
     const sorted = [...windows].sort((a, b) => b.z - a.z);
     const topWindow = sorted[0];
 
@@ -148,140 +87,189 @@ export default function Taskbar() {
     if (!target) return;
     const newOrder = [...others, target];
     newOrder.forEach((w, index) => {
-      const newZ = index + 1;
-      const focused = w.id === id;
-      if (w.z !== newZ || w.focused !== focused) {
-        dispatch({
-          type: "UPDATE_WINDOW",
-          payload: { id: w.id, z: newZ, focused },
-        });
-      }
+      dispatch({
+        type: "UPDATE_WINDOW",
+        payload: { id: w.id, z: index + 1, focused: w.id === id },
+      });
     });
   };
 
   const handleScroll = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
-
-    if (Math.abs(e.deltaY) < 5) return;
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-    const totalThemes = 5;
-    const newIndex = (state.osIndex + direction + totalThemes) % totalThemes;
-
-    if (newIndex !== state.osIndex) {
-      dispatch({ type: "SET_OS", payload: newIndex });
+    scrollAccumulator.current += e.deltaY;
+    const SCROLL_THRESHOLD = 150;
+    const TIME_DELAY = 250;
+    if (Math.abs(scrollAccumulator.current) > SCROLL_THRESHOLD) {
+      const now = Date.now();
+      if (now - lastSwitchTime.current > TIME_DELAY) {
+        const direction = scrollAccumulator.current > 0 ? 1 : -1;
+        const totalThemes = 4; // Removed Win11, so total is 4 (0,1,2,3)
+        const current = localOsIndex.current;
+        const newIndex = (current + direction + totalThemes) % totalThemes;
+        if (newIndex !== current) {
+          dispatch({ type: "SET_OS", payload: newIndex });
+          lastSwitchTime.current = now;
+          localOsIndex.current = newIndex;
+        }
+        scrollAccumulator.current = 0;
+      }
     }
   };
 
-  return (
-    <div
-      className="fixed bottom-0 left-0 right-0 flex items-center justify-between select-none z-[9999]"
-      style={{
-        height: "28px",
-        backgroundColor: "var(--ButtonFace)",
-        borderTop: "1px solid var(--ButtonHilight)",
-        boxShadow: "inset 0 1px 0 var(--ButtonFace)",
-        color: "var(--ButtonText)",
-        padding: "2px",
-      }}
-    >
-      {/* Start Button */}
-      <div className="flex items-center px-1 h-full">
+  const renderStartButton = () => {
+    const index = state.osIndex;
+    if (index === 0) {
+      return (
         <button
-          className="px-2 h-full flex items-center gap-1 font-bold active:translate-y-[1px] active:translate-x-[1px]"
+          ref={startButtonRef}
+          onClick={() => dispatch({ type: "TOGGLE_START_MENU" })}
+          className={`px-1 h-full flex items-center gap-1 font-bold active:translate-y-[1px] active:translate-x-[1px] ${state.startMenuOpen ? "active" : ""} transition-all duration-300`}
           style={{
             backgroundColor: "var(--ButtonFace)",
             borderTop: "1px solid var(--ButtonHilight)",
             borderLeft: "1px solid var(--ButtonHilight)",
             borderRight: "1px solid var(--ButtonDkShadow)",
             borderBottom: "1px solid var(--ButtonDkShadow)",
-            boxShadow:
-              "inset -1px -1px 0 var(--ButtonShadow), inset 1px 1px 0 var(--ButtonFace)",
+            boxShadow: state.startMenuOpen
+              ? "inset 1px 1px 0 0 var(--ButtonShadow)"
+              : "inset -1px -1px 0 var(--ButtonShadow), inset 1px 1px 0 var(--ButtonFace)",
             color: "var(--ButtonText)",
             fontSize: "11px",
-            fontFamily: "Segoe UI, sans-serif",
+            fontFamily: "var(--os-font)",
+            minWidth: "60px",
           }}
         >
-          <div className="w-4 h-4 bg-black/20" /> {/* Logo placeholder */}
-          Start
+          <img src="/assets/win98/start.avif" alt="" className="w-4 h-4" />
+          <span className="pt-[1px]">Start</span>
         </button>
+      );
+    }
+    if (index === 1) {
+      return (
+        <button
+          ref={startButtonRef}
+          onClick={() => dispatch({ type: "TOGGLE_START_MENU" })}
+          className="h-full flex items-center justify-center hover:brightness-110 active:scale-95 transition-transform duration-200"
+          style={{ background: "none", border: "none", padding: 0 }}
+        >
+          <img
+            src="/assets/winxp/start.avif"
+            alt="Start"
+            className="h-[110%] object-contain origin-left"
+            style={{ marginTop: "-1px" }}
+          />
+        </button>
+      );
+    }
+    if (index === 2 || index === 3) {
+      const isWin7 = index === 2;
+      const iconPath = isWin7
+        ? "/assets/win7/start.avif"
+        : "/assets/win10/start.avif";
+      return (
+        <button
+          ref={startButtonRef}
+          onClick={() => dispatch({ type: "TOGGLE_START_MENU" })}
+          className="h-full flex items-center justify-center pl-2 pr-1 hover:brightness-110 transition-transform duration-200"
+        >
+          <img
+            src={iconPath}
+            alt="Start"
+            className={isWin7 ? "w-8 h-8 scale-110" : "w-8 h-8 p-1"}
+          />
+        </button>
+      );
+    }
+    return null;
+  };
 
-        {/* Divider / Handle */}
-        <div className="w-[2px] h-[20px] mx-1 border-l border-[var(--ButtonShadow)] border-r border-[var(--ButtonHilight)]" />
+  const taskbarHeight =
+    state.osIndex === 0 || state.osIndex === 1 ? "30px" : "40px";
+
+  // Dynamic styles for the Taskbar container
+  const taskbarStyle: React.CSSProperties = {
+    height: taskbarHeight,
+    background: "var(--os-taskbar-bg)",
+    borderTop: state.osIndex === 0 ? "1px solid var(--ButtonHilight)" : "none",
+    boxShadow:
+      state.osIndex === 0
+        ? "inset 0 1px 0 var(--ButtonFace)"
+        : "0 -1px 0 rgba(255,255,255,0.05)",
+    color: "var(--ButtonText)",
+    padding: "0",
+    fontFamily: "var(--os-font)",
+  };
+
+  return (
+    <div
+      className="fixed bottom-0 left-0 right-0 flex items-center select-none z-[9999] transition-all duration-500 ease-in-out"
+      style={taskbarStyle}
+    >
+      <div className="start-menu-container">
+        <StartMenu />
+      </div>
+      <div className="flex-1 flex items-center h-full w-full justify-start">
+        <div className="flex items-center h-full mr-1">
+          {renderStartButton()}
+          {state.osIndex === 0 && (
+            <div className="w-[2px] h-[20px] mx-1 border-l border-[var(--ButtonShadow)] border-r border-[var(--ButtonHilight)]" />
+          )}
+        </div>
+
+        <div className="flex items-center gap-1 h-full overflow-hidden">
+          {Object.entries(groupedWindows).map(([programId, windows]) => {
+            const isActive = windows.some((w) => w.focused && !w.minimized);
+            const isRunning = windows.length > 0;
+            if (!isRunning) return null;
+
+            return (
+              <button
+                key={programId}
+                onClick={() => handleProgramClick(programId)}
+                className={`h-[80%] flex items-center px-2 gap-2 truncate transition-all duration-300 ${state.osIndex > 0 ? "hover:bg-white/10" : ""}`}
+                style={getTaskbarButtonStyle(state.osIndex, isActive)}
+              >
+                <div className="w-4 h-4 shrink-0 text-current">
+                  {getProgramIcon(programId)}
+                </div>
+                {state.osIndex <= 1 && (
+                  <span className="truncate font-normal">{programId}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Window List */}
-      <div className="flex-1 flex items-center gap-1 h-full overflow-hidden">
-        {Object.entries(groupedWindows).map(([programId, windows]) => {
-          const isActive = windows.some((w) => w.focused && !w.minimized);
-          const isRunning = windows.length > 0;
-          if (!isRunning) return null;
-
-          // Taskbar Item Style
-          const baseStyle = {
-            backgroundColor: "var(--ButtonFace)",
-            color: "var(--ButtonText)",
-            borderTop: isActive
-              ? "1px solid var(--ButtonShadow)"
-              : "1px solid var(--ButtonHilight)",
-            borderLeft: isActive
-              ? "1px solid var(--ButtonShadow)"
-              : "1px solid var(--ButtonHilight)",
-            borderRight: isActive
-              ? "1px solid var(--ButtonHilight)"
-              : "1px solid var(--ButtonDkShadow)",
-            borderBottom: isActive
-              ? "1px solid var(--ButtonHilight)"
-              : "1px solid var(--ButtonDkShadow)",
-            boxShadow: isActive
-              ? "inset 1px 1px 0 0 var(--ButtonDkShadow)" // Pushed in
-              : "inset -1px -1px 0 0 var(--ButtonShadow), inset 1px 1px 0 0 var(--ButtonLight)", // Popped out
-            backgroundImage: isActive
-              ? "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==')" // Dither pattern
-              : "none",
-            opacity: 1,
-            fontFamily: "Segoe UI, sans-serif",
-            fontSize: "11px",
-          };
-
-          return (
-            <button
-              key={programId}
-              onClick={() => handleProgramClick(programId)}
-              className="flex-1 max-w-[160px] h-full flex items-center px-1 gap-1 truncate active:border-l-black active:border-t-black"
-              style={baseStyle}
-            >
-              <div className="w-4 h-4 shrink-0 text-current">
-                {getProgramIcon(programId)}
-              </div>
-              <span className="truncate font-normal">{programId}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Clock / Tray / OS Switcher */}
       <div
-        className="flex items-center px-2 h-full ml-1 cursor-ns-resize hover:bg-black/5 transition-colors"
+        className={`flex items-center px-2 h-full ml-auto cursor-ns-resize hover:bg-black/5 transition-all duration-500 ${state.osIndex === 0 ? "border-l border-gray-400 inset-shadow" : ""}`}
         onWheel={handleScroll}
         title="Scroll to switch OS"
-        style={{
-          borderTop: "1px solid var(--ButtonShadow)",
-          borderLeft: "1px solid var(--ButtonShadow)",
-          borderRight: "1px solid var(--ButtonHilight)",
-          borderBottom: "1px solid var(--ButtonHilight)",
-          boxShadow:
-            "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)", // Deep Inset
-          backgroundColor: "var(--ButtonFace)",
-          minWidth: "70px",
-          justifyContent: "center",
-        }}
+        style={
+          state.osIndex === 0
+            ? {
+                borderTop: "1px solid var(--ButtonShadow)",
+                borderLeft: "1px solid var(--ButtonShadow)",
+                borderRight: "1px solid var(--ButtonHilight)",
+                borderBottom: "1px solid var(--ButtonHilight)",
+                boxShadow:
+                  "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)",
+                backgroundColor: "var(--ButtonFace)",
+                minWidth: "80px",
+                justifyContent: "center",
+              }
+            : {
+                minWidth: "80px",
+                justifyContent: "center",
+                color: "var(--os-text)",
+              }
+        }
       >
         <span
           className="text-xs font-normal"
-          style={{ fontFamily: "Segoe UI, sans-serif" }}
+          style={{ fontFamily: "var(--os-font)" }}
         >
-          {osThemes[state.osIndex].name}
+          {time}
         </span>
       </div>
     </div>

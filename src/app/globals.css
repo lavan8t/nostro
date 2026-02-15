@@ -3,15 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --os-font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --os-font: system-ui, -apple-system, sans-serif;
   --os-wallpaper: none;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 /* --------------------------------------------------
@@ -74,20 +72,6 @@
   font-style: normal;
 }
 
-/* Windows 11 */
-@font-face {
-  font-family: "Win11";
-  src: url("/assets/fonts/regular.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Win11";
-  src: url("/assets/fonts/bold.woff2") format("woff2");
-  font-weight: bold;
-  font-style: normal;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -98,5 +82,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--os-font);
+  font-family: var(--os-font), system-ui, sans-serif;
 }
