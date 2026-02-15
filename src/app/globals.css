@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --os-font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --os-wallpaper: none;
 }
 
 @theme inline {
@@ -10,6 +12,80 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* --------------------------------------------------
+   FONTS
+-------------------------------------------------- */
+
+/* Windows 98 */
+@font-face {
+  font-family: "Win98";
+  src: url("/assets/win98/fonts/regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Win98";
+  src: url("/assets/win98/fonts/bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Windows XP */
+@font-face {
+  font-family: "WinXP";
+  src: url("/assets/winxp/fonts/regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "WinXP";
+  src: url("/assets/winxp/fonts/bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Windows 7 */
+@font-face {
+  font-family: "Win7";
+  src: url("/assets/fonts/regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Win7";
+  src: url("/assets/fonts/bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Windows 10 */
+@font-face {
+  font-family: "Win10";
+  src: url("/assets/fonts/regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Win10";
+  src: url("/assets/fonts/bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Windows 11 */
+@font-face {
+  font-family: "Win11";
+  src: url("/assets/fonts/regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Win11";
+  src: url("/assets/fonts/bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +98,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--os-font);
 }

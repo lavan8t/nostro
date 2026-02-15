@@ -1,10 +1,12 @@
 export interface ThemeTokens {
   // Core
   bg: string;
+  wallpaper: string; // New wallpaper token
   text: string;
   taskbarBg: string;
   accent: string;
   windowBorder: string;
+  font: string;
 
   // System Colors (Win32 naming convention approx)
   buttonFace: string;
@@ -49,10 +51,12 @@ export const osThemes: OSTheme[] = [
     name: "Windows 98",
     tokens: {
       bg: "#008080",
+      wallpaper: "url('/assets/win98/wallpaper.avif')",
       text: "#000000",
       taskbarBg: "#c0c0c0",
       accent: "#000080",
       windowBorder: "#c0c0c0",
+      font: '"Win98", sans-serif',
 
       buttonFace: "#c0c0c0",
       buttonHilight: "#ffffff",
@@ -81,10 +85,12 @@ export const osThemes: OSTheme[] = [
     name: "Windows XP",
     tokens: {
       bg: "#293955",
+      wallpaper: "url('/assets/winxp/wallpaper.avif')",
       text: "#000000",
       taskbarBg: "#245edb",
       accent: "#3d9e3d",
       windowBorder: "#0058ee",
+      font: '"WinXP", "Tahoma", sans-serif',
 
       buttonFace: "#ece9d8",
       buttonHilight: "#ffffff",
@@ -113,10 +119,12 @@ export const osThemes: OSTheme[] = [
     name: "Windows 7",
     tokens: {
       bg: "#1e1e1e",
+      wallpaper: "url('/assets/win7/wallpaper.avif')",
       text: "#000000",
       taskbarBg: "rgba(23, 23, 23, 0.85)", // Glass-like
       accent: "#4593ce",
       windowBorder: "rgba(0, 0, 0, 0.4)",
+      font: '"Win7", "Segoe UI", sans-serif',
 
       buttonFace: "#f0f0f0",
       buttonHilight: "#ffffff",
@@ -125,7 +133,7 @@ export const osThemes: OSTheme[] = [
       buttonLight: "#e3e3e3",
       buttonText: "#000000",
 
-      activeTitle: "#000000", // Fallbacks if 7.css isn't applied
+      activeTitle: "#000000",
       activeTitleText: "#ffffff",
       gradientActiveTitle: "#000000",
 
@@ -146,10 +154,12 @@ export const osThemes: OSTheme[] = [
     light: {
       tokens: {
         bg: "#f0f0f0",
+        wallpaper: "url('/assets/win10/wallpaper.avif')",
         text: "#000000",
         taskbarBg: "#e5e5e5",
         accent: "#0078d7",
         windowBorder: "#d9d9d9",
+        font: '"Win10", "Segoe UI", sans-serif',
         buttonFace: "#ffffff",
         buttonHilight: "#ffffff",
         buttonShadow: "#d9d9d9",
@@ -172,10 +182,12 @@ export const osThemes: OSTheme[] = [
     dark: {
       tokens: {
         bg: "#1f1f1f",
+        wallpaper: "url('/assets/win10/wallpaper.avif')",
         text: "#ffffff",
         taskbarBg: "#101010",
         accent: "#0078d7",
         windowBorder: "#333333",
+        font: '"Win10", "Segoe UI", sans-serif',
         buttonFace: "#2d2d2d",
         buttonHilight: "#444444",
         buttonShadow: "#1a1a1a",
@@ -201,10 +213,12 @@ export const osThemes: OSTheme[] = [
     name: "Windows 11",
     tokens: {
       bg: "#f3f3f3",
+      wallpaper: "url('/assets/win11/wallpaper.avif')",
       text: "#1a1a1a",
       taskbarBg: "#ffffff",
       accent: "#0067c0",
       windowBorder: "#e5e5e5",
+      font: '"Win11", "Segoe UI", sans-serif',
       buttonFace: "#ffffff",
       buttonHilight: "#f9f9f9",
       buttonShadow: "#e0e0e0",
@@ -243,10 +257,12 @@ export const applyTheme = (osIndex: number): void => {
   const root = document.documentElement;
   // Core
   root.style.setProperty("--os-bg", tokens.bg);
+  root.style.setProperty("--os-wallpaper", tokens.wallpaper);
   root.style.setProperty("--os-text", tokens.text);
   root.style.setProperty("--os-taskbar-bg", tokens.taskbarBg);
   root.style.setProperty("--os-accent", tokens.accent);
   root.style.setProperty("--os-window-border", tokens.windowBorder);
+  root.style.setProperty("--os-font", tokens.font);
 
   // System Colors
   root.style.setProperty("--ButtonFace", tokens.buttonFace);
