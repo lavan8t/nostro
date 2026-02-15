@@ -1,9 +1,31 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useAppContext, WindowState, MenuItem } from "../state/AppContext";
 import { Icons } from "./Icons";
+
+// --------------------------------------------------
+// CONSTANTS & STYLES (Migrated from CSS Module)
+// --------------------------------------------------
+
+// Windows 7 Theme Constants
+const WIN7_STYLES = {
+  glassBackground: `
+    linear-gradient(135deg, #fff5 70px, transparent 100px),
+    linear-gradient(225deg, #fff5 70px, transparent 100px),
+    linear-gradient(
+      54deg,
+      #0002 0 4%, #6661 6% 6%, #0002 8% 10%, #0002 15% 16%, #aaa1 17% 18%,
+      #0002 23% 24%, #bbb2 25% 26%, #0002 31% 33%, #0002 34% 34.5%, #bbb2 36% 40%,
+      #0002 41% 41.5%, #bbb2 44% 45%, #bbb2 46% 47%, #0002 48% 49%, #0002 50% 50.5%,
+      #0002 56% 56.5%, #bbb2 57% 63%, #0002 67% 69%, #bbb2 69.5% 70%, #0002 73.5% 74%,
+      #bbb2 74.5% 79%, #0002 80% 84%, #aaa2 85% 86%, #0002 87%, #bbb1 90%
+    ) center/100vw 100vh no-repeat fixed
+  `,
+  windowBg: "#4580c4",
+  borderColor: "#000000b3",
+};
 
 // --------------------------------------------------
 // TYPES
@@ -26,16 +48,8 @@ type SnapType =
   | "bottom-right"
   | null;
 
-interface WindowFrameProps {
-  win: WindowState;
-  children: React.ReactNode;
-  viewportSize: { width: number; height: number };
-  onSnapHover: (rect: SnapRect | null) => void;
-  menuItems?: MenuItem[];
-}
-
 // --------------------------------------------------
-// HELPER: Title
+// HELPER
 // --------------------------------------------------
 
 const getWindowTitle = (id: string) => {
@@ -49,136 +63,141 @@ const getWindowTitle = (id: string) => {
 };
 
 // --------------------------------------------------
-// HELPER: Title Bar Controls
+// SUB-COMPONENTS
 // --------------------------------------------------
 
-const TitleBarControls = ({
-  osIndex,
-  onMinimize,
-  onMaximize,
-  onClose,
+// Authentic XP Button
+function XPButton({
+  type,
+  onClick,
 }: {
-  osIndex: number;
-  onMinimize: (e: React.MouseEvent) => void;
-  onMaximize: (e: React.MouseEvent) => void;
-  onClose: (e: React.MouseEvent) => void;
-}) => {
-  // Win98 / Classic
-  if (osIndex === 0) {
-    return (
-      <div className="flex items-center gap-[2px] mr-[2px]">
-        <button
-          onClick={onMinimize}
-          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)]"
-        >
-          <div className="w-[6px] h-[2px] bg-black mb-[4px]" />
-        </button>
-        <button
-          onClick={onMaximize}
-          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)]"
-        >
-          <div className="w-[9px] h-[8px] border-t-2 border-l-2 border-r border-b border-black" />
-        </button>
-        <button
-          onClick={onClose}
-          className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-[var(--ButtonHilight)] border-l border-[var(--ButtonHilight)] border-r border-[var(--ButtonDkShadow)] border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)] ml-[2px]"
-        >
-          <svg viewBox="0 0 10 10" className="w-[8px] h-[8px]">
-            <path d="M1 1L9 9M9 1L1 9" stroke="black" strokeWidth="1.5" />
-          </svg>
-        </button>
-      </div>
-    );
-  }
+  type: string;
+  onClick: (e: any) => void;
+}) {
+  const isClose = type === "close";
+  const bg = isClose
+    ? "radial-gradient(circle at 90% 90%, #cc4600 0%, #dc6527 55%, #cd7546 70%, #ffccb2 90%, white 100%)"
+    : "radial-gradient(circle at 90% 90%, #0054e9 0%, #2263d5 55%, #4479e4 70%, #a3bbec 90%, white 100%)";
+  const shadow = isClose
+    ? "inset 0 -1px 2px 1px #da4600"
+    : "inset 0 -1px 2px 1px #4646ff";
 
-  // WinXP
-  if (osIndex === 1) {
-    return (
-      <div className="flex items-center gap-1 mr-1">
-        <button
-          onClick={onMinimize}
-          className="w-[21px] h-[21px] bg-[#2963d7] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20"
-        >
-          <div className="w-[8px] h-[2px] bg-white mt-1" />
-        </button>
-        <button
-          onClick={onMaximize}
-          className="w-[21px] h-[21px] bg-[#2963d7] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20"
-        >
-          <div className="w-[10px] h-[8px] border border-white" />
-        </button>
-        <button
-          onClick={onClose}
-          className="w-[21px] h-[21px] bg-[#d73f29] rounded-[3px] flex items-center justify-center text-white hover:brightness-110 shadow-inner border border-white/20 ml-1"
-        >
-          <svg viewBox="0 0 10 10" className="w-[8px] h-[8px]">
-            <path d="M1 1L9 9M9 1L1 9" stroke="white" strokeWidth="2" />
-          </svg>
-        </button>
-      </div>
-    );
-  }
-
-  // Win7 / 10 (Modern)
-  const isWin7 = osIndex === 2;
   return (
-    <div className={`flex items-center h-full ${isWin7 ? "gap-1 mr-2" : ""}`}>
-      <button
-        onClick={onMinimize}
-        className={`h-full flex items-center justify-center hover:bg-black/10 transition-colors ${isWin7 ? "w-[28px]" : "w-[46px]"}`}
-      >
-        <div className="w-[10px] h-[1px] bg-current" />
-      </button>
-      <button
-        onClick={onMaximize}
-        className={`h-full flex items-center justify-center hover:bg-black/10 transition-colors ${isWin7 ? "w-[28px]" : "w-[46px]"}`}
-      >
-        <div className="w-[10px] h-[10px] border border-current" />
-      </button>
-      <button
-        onClick={onClose}
-        className={`h-full flex items-center justify-center hover:bg-[#e81123] hover:text-white transition-colors ${isWin7 ? "w-[40px] rounded-[3px]" : "w-[46px]"}`}
-      >
-        <svg viewBox="0 0 10 10" className="w-[10px] h-[10px]">
-          <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1" />
+    <button
+      onClick={onClick}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="group relative flex items-center justify-center rounded-[3px] border border-white hover:brightness-110 active:brightness-90 outline-none"
+      style={{
+        width: "21px",
+        height: "21px",
+        backgroundImage: bg,
+        boxShadow: shadow,
+        marginLeft: "2px",
+        cursor: "default",
+      }}
+    >
+      {type === "minimize" && (
+        <div className="absolute left-[4px] top-[13px] w-[8px] h-[3px] bg-white shadow-[0_1px_0_rgba(0,0,0,0.3)]" />
+      )}
+      {type === "maximize" && (
+        <div className="absolute left-[4px] top-[4px] w-[12px] h-[12px] shadow-[inset_0_3px_0_0_white,inset_0_0_0_1px_white]" />
+      )}
+      {type === "restore" && (
+        <>
+          <div className="absolute left-[7px] top-[4px] w-[8px] h-[8px] shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white]" />
+          <div className="absolute left-[4px] top-[7px] w-[8px] h-[8px] bg-[#136dff] shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white] z-10" />
+        </>
+      )}
+      {type === "close" && (
+        <svg
+          viewBox="0 0 10 10"
+          className="w-[10px] h-[10px] text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.3)]"
+          style={{ filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.25))" }}
+        >
+          <path d="M0 0 L10 10 M10 0 L0 10" stroke="white" strokeWidth="2" />
         </svg>
-      </button>
-    </div>
+      )}
+    </button>
   );
-};
+}
+
+// Authentic Win98/Classic Button
+function ClassicButton({
+  type,
+  onClick,
+  isMaximized,
+}: {
+  type: string;
+  onClick: (e: any) => void;
+  isMaximized?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-l border-[var(--ButtonHilight)] border-r border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)] shadow-[inset_-1px_-1px_0_0_var(--ButtonShadow),inset_1px_1px_0_0_var(--ButtonLight)] active:shadow-[inset_1px_1px_0_0_var(--ButtonShadow)] p-0 m-0 group"
+    >
+      <div className="w-full h-full relative group-active:translate-x-[1px] group-active:translate-y-[1px]">
+        {type === "minimize" && (
+          <div className="absolute left-[3px] bottom-[3px] w-[6px] h-[2px] bg-[var(--ButtonText)]" />
+        )}
+        {type === "maximize" && !isMaximized && (
+          <div className="absolute top-[2px] left-[2px] w-[9px] h-[8px] border-t-[2px] border border-[var(--ButtonText)]" />
+        )}
+        {type === "maximize" && isMaximized && (
+          <>
+            <div className="absolute bottom-[3px] left-[1px] w-[7px] h-[7px] border-t-[2px] border border-[var(--ButtonText)] bg-[var(--ButtonFace)] z-[2]" />
+            <div className="absolute top-[1px] right-[2px] w-[7px] h-[7px] border-t-[2px] border border-[var(--ButtonText)] z-[1]" />
+          </>
+        )}
+        {type === "close" && (
+          <>
+            <div className="absolute top-1/2 left-1/2 w-[12px] h-[2px] bg-[var(--ButtonText)] -translate-x-1/2 -translate-y-1/2 rotate-45" />
+            <div className="absolute top-1/2 left-1/2 w-[12px] h-[2px] bg-[var(--ButtonText)] -translate-x-1/2 -translate-y-1/2 -rotate-45" />
+          </>
+        )}
+      </div>
+    </button>
+  );
+}
 
 // --------------------------------------------------
-// COMPONENT
+// MAIN COMPONENT
 // --------------------------------------------------
 
 export default function WindowFrame({
   win,
-  children,
-  viewportSize,
   onSnapHover,
+  viewportSize,
+  children,
   menuItems,
-}: WindowFrameProps) {
+}: {
+  win: WindowState;
+  onSnapHover: (rect: SnapRect | null) => void;
+  viewportSize: { width: number; height: number };
+  children?: React.ReactNode;
+  menuItems?: MenuItem[];
+}) {
   const { state, dispatch } = useAppContext();
   const { width: vw, height: vh } = viewportSize;
 
-  // Refs & State
-  const rndRef = useRef<Rnd>(null);
-  const snapTypeRef = useRef<SnapType>(null);
-  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
   const [animState, setAnimState] = useState<
     "entering" | "visible" | "exiting" | "closing"
   >("entering");
   const [isInteracting, setIsInteracting] = useState(false);
 
-  // OS Flags
-  const isWin10 = state.osIndex === 3;
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const snapTypeRef = useRef<SnapType>(null);
+
   const isWin7 = state.osIndex === 2;
   const isXP = state.osIndex === 1;
   const isClassic = state.osIndex === 0;
 
-  // Mount Animation
+  const windowTitle = getWindowTitle(win.id);
+
+  // Mount animation
   useEffect(() => {
     setAnimState("entering");
     const raf1 = requestAnimationFrame(() => {
@@ -195,16 +214,19 @@ export default function WindowFrame({
   // Actions
   const activate = () => {
     if (!win.focused) {
-      dispatch({
-        type: "UPDATE_WINDOW",
-        payload: { id: win.id, z: 0, focused: true },
+      const sorted = [...state.windows].sort((a, b) => a.z - b.z);
+      const others = sorted.filter((w) => w.id !== win.id);
+      [...others, win].forEach((w, i) => {
+        dispatch({
+          type: "UPDATE_WINDOW",
+          payload: { id: w.id, z: i + 1, focused: w.id === win.id },
+        });
       });
     }
   };
 
   const handleMinimize = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
     setAnimState("exiting");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "MINIMIZE_WINDOW", payload: win.id });
@@ -220,77 +242,49 @@ export default function WindowFrame({
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
     setAnimState("closing");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "REMOVE_WINDOW", payload: win.id });
     }, 300);
   };
 
-  // Drag & Snap Logic
+  // Drag Logic
   const handleDrag = (e: any, d: any) => {
-    if (win.maximized) {
-      if (d.y > 20) {
-        const restoredWidth = win.width;
-        const newX = Math.max(
-          -(restoredWidth - 10),
-          Math.min(e.clientX - restoredWidth / 2, vw - 10),
-        );
-        dispatch({ type: "UNMAXIMIZE_WINDOW", payload: win.id });
-        dispatch({
-          type: "UPDATE_WINDOW",
-          payload: { id: win.id, x: newX, y: d.y, focused: true },
-        });
-      }
+    if (win.maximized && d.y > 20) {
+      const newX = Math.max(
+        -(win.width - 10),
+        Math.min(e.clientX - win.width / 2, vw - 10),
+      );
+      dispatch({ type: "UNMAXIMIZE_WINDOW", payload: win.id });
+      dispatch({
+        type: "UPDATE_WINDOW",
+        payload: { id: win.id, x: newX, y: d.y, focused: true },
+      });
       return;
     }
-
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const taskbarHeight = 40;
-    const workHeight = vh - taskbarHeight;
-    const EDGE = 20;
-
+    const mouseX = e.clientX,
+      mouseY = e.clientY,
+      workHeight = vh - 40;
     let newSnap: SnapType = null;
     let preview: SnapRect | null = null;
 
     if (mouseY < 10) {
-      if (mouseX < EDGE) {
+      if (mouseX < 20) {
         newSnap = "top-left";
         preview = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
-      } else if (mouseX > vw - EDGE) {
+      } else if (mouseX > vw - 20) {
         newSnap = "top-right";
         preview = { x: vw / 2, y: 0, width: vw / 2, height: workHeight / 2 };
       } else {
         newSnap = "top";
         preview = { x: 0, y: 0, width: vw, height: workHeight };
       }
-    } else if (mouseY > workHeight - EDGE) {
-      if (mouseX < EDGE) {
-        newSnap = "bottom-left";
-        preview = {
-          x: 0,
-          y: workHeight / 2,
-          width: vw / 2,
-          height: workHeight / 2,
-        };
-      } else if (mouseX > vw - EDGE) {
-        newSnap = "bottom-right";
-        preview = {
-          x: vw / 2,
-          y: workHeight / 2,
-          width: vw / 2,
-          height: workHeight / 2,
-        };
-      }
-    } else {
-      if (mouseX < EDGE) {
-        newSnap = "left";
-        preview = { x: 0, y: 0, width: vw / 2, height: workHeight };
-      } else if (mouseX > vw - EDGE) {
-        newSnap = "right";
-        preview = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
-      }
+    } else if (mouseX < 20) {
+      newSnap = "left";
+      preview = { x: 0, y: 0, width: vw / 2, height: workHeight };
+    } else if (mouseX > vw - 20) {
+      newSnap = "right";
+      preview = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
     }
 
     if (snapTypeRef.current !== newSnap) {
@@ -302,46 +296,15 @@ export default function WindowFrame({
   const handleDragStop = (e: any, d: any) => {
     setIsInteracting(false);
     const snap = snapTypeRef.current;
-    const workHeight = vh - 40;
-    const maxZ = state.windows.reduce((max, w) => Math.max(max, w.z), 0);
-
     if (snap) {
-      if (snap === "top") {
+      if (snap === "top")
         dispatch({ type: "MAXIMIZE_WINDOW", payload: win.id });
-      } else {
-        let rect = { x: 0, y: 0, width: 0, height: 0 };
-        if (snap === "left")
-          rect = { x: 0, y: 0, width: vw / 2, height: workHeight };
-        else if (snap === "right")
-          rect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight };
-        else if (snap === "top-left")
-          rect = { x: 0, y: 0, width: vw / 2, height: workHeight / 2 };
-        else if (snap === "top-right")
-          rect = { x: vw / 2, y: 0, width: vw / 2, height: workHeight / 2 };
-        else if (snap === "bottom-left")
-          rect = {
-            x: 0,
-            y: workHeight / 2,
-            width: vw / 2,
-            height: workHeight / 2,
-          };
-        else if (snap === "bottom-right")
-          rect = {
-            x: vw / 2,
-            y: workHeight / 2,
-            width: vw / 2,
-            height: workHeight / 2,
-          };
-
+      else {
+        let rect = { x: 0, y: 0, width: vw / 2, height: vh - 40 };
+        if (snap === "right") rect.x = vw / 2;
         dispatch({
           type: "UPDATE_WINDOW",
-          payload: {
-            id: win.id,
-            ...rect,
-            maximized: false,
-            focused: true,
-            z: maxZ + 1,
-          },
+          payload: { id: win.id, ...rect, maximized: false, focused: true },
         });
       }
     } else {
@@ -354,10 +317,16 @@ export default function WindowFrame({
     onSnapHover(null);
   };
 
-  // Rendering Styles
+  // Styles Hook
   const dropDistance = vh - win.y;
-
-  const getAnimationStyles = (): React.CSSProperties => {
+  const getStyles = () => {
+    if (isXP || isClassic) {
+      return {
+        opacity: animState === "visible" ? 1 : 0,
+        transition: "opacity 150ms ease-in-out",
+        transform: "none",
+      };
+    }
     const base =
       "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-in-out";
     if (animState === "entering")
@@ -386,152 +355,370 @@ export default function WindowFrame({
     };
   };
 
-  const titleBarHeight = isClassic ? 18 : 30;
+  const rndTransition = isInteracting
+    ? "none"
+    : "transform 200ms ease-in-out, width 200ms ease-in-out, height 200ms ease-in-out";
+  const position = win.maximized ? { x: 0, y: 0 } : { x: win.x, y: win.y };
+  const size = win.maximized
+    ? { width: vw, height: Math.max(0, vh - 40) }
+    : { width: win.width, height: win.height };
 
-  const frameStyle: React.CSSProperties = {
-    backgroundColor: "var(--os-bg)",
-    boxShadow: isClassic
-      ? "1px 1px 0 0 black, -1px -1px 0 0 white, inset 1px 1px 0 0 var(--ButtonHilight), inset -1px -1px 0 0 var(--ButtonShadow)"
-      : isXP
-        ? "4px 4px 8px rgba(0,0,0,0.3)"
-        : "0 0 10px rgba(0,0,0,0.3), 0 0 0 1px var(--os-window-border)",
-    border: isClassic
-      ? "2px solid var(--ButtonFace)"
-      : isXP
-        ? "3px solid #0058ee"
-        : isWin7
-          ? "1px solid rgba(0,0,0,0.4)"
-          : "1px solid var(--os-window-border)",
-    borderRadius: isXP ? "4px 4px 0 0" : isWin7 ? "6px" : "0px",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    fontFamily: "var(--os-font)",
-    ...getAnimationStyles(),
-  };
+  // --------------------------------------------------
+  // WINDOWS 7 RENDERER (Original Style Logic Migrated)
+  // --------------------------------------------------
+  if (isWin7) {
+    return (
+      <Rnd
+        size={size}
+        position={position}
+        style={{ zIndex: win.z, transition: rndTransition }}
+        dragHandleClassName="window-header"
+        disableDragging={win.maximized}
+        enableResizing={!win.maximized}
+        onDragStart={() => {
+          setIsInteracting(true);
+          activate();
+        }}
+        onResizeStart={() => {
+          setIsInteracting(true);
+          activate();
+        }}
+        onDrag={handleDrag}
+        onDragStop={handleDragStop}
+        onMouseDown={activate}
+      >
+        <div style={{ width: "100%", height: "100%" }}>
+          <div
+            className={`window ${win.focused ? "active" : ""}`}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              borderRadius: "6px",
+              boxShadow: `2px 2px 10px 1px ${WIN7_STYLES.borderColor}, inset 0 0 0 1px #fffa`,
+              border: `1px solid ${WIN7_STYLES.borderColor}`,
+              backgroundColor: "transparent",
+              position: "relative",
+              ...getStyles(),
+            }}
+          >
+            {/* Glass Overlay Background */}
+            <div
+              style={{
+                position: "absolute",
+                zIndex: -1,
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                borderRadius: "6px",
+                background: `linear-gradient(transparent 20%, #ffffffb3 40%, transparent 41%), linear-gradient(to right, #ffffff66, #0000001a, #ffffff33), ${WIN7_STYLES.windowBg}`,
+                backgroundColor: WIN7_STYLES.windowBg,
+                boxShadow: "inset 0 0 0 1px #fffd",
+                opacity: 0.95,
+              }}
+            />
 
+            {/* Title Bar */}
+            <div
+              className="window-header"
+              onDoubleClick={handleMaximizeToggle}
+              style={{
+                borderRadius: "6px 6px 0 0",
+                background: "transparent",
+                boxShadow:
+                  "inset 0 1px 0 #fffd, inset 1px 0 0 #fffd, inset -1px 0 0 #fffd",
+                display: "flex",
+                alignItems: "center",
+                padding: "3px 2px",
+                minHeight: "18px",
+                color: "#000",
+                textShadow: "0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff",
+                fontWeight: "bold",
+                userSelect: "none",
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  padding: "0 4px",
+                }}
+              >
+                {windowTitle}
+              </div>
+              {/* Controls */}
+              <div
+                style={{
+                  display: "flex",
+                  background: "#fff3",
+                  border: "1px solid #0000004d",
+                  borderTop: "0",
+                  borderRadius: "0 0 5px 5px",
+                  boxShadow: "0 1px 0 #fffa, 1px 0 0 #fffa, -1px 0 0 #fffa",
+                  marginRight: "4px",
+                }}
+              >
+                <button
+                  onClick={handleMinimize}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="w-[28px] h-[18px] border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                >
+                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
+                    <div className="absolute left-[9px] bottom-[4px] w-[10px] h-[2px] bg-[#000]" />
+                  </div>
+                </button>
+                <button
+                  onClick={handleMaximizeToggle}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="w-[28px] h-[18px] border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                >
+                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
+                    <div className="absolute top-[4px] left-[9px] w-[10px] h-[8px] border border-[#000]" />
+                  </div>
+                </button>
+                <button
+                  onClick={handleClose}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="w-[40px] h-[18px] rounded-[0_0_5px_0] hover:bg-[#d54f36] relative group"
+                >
+                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
+                    <div className="absolute top-[4px] left-[14px] w-[12px] h-[10px] text-[#000] group-hover:text-white font-sans font-bold leading-[10px]">
+                      x
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div
+              style={{
+                flex: 1,
+                margin: "6px",
+                marginTop: "0",
+                border: `1px solid ${WIN7_STYLES.borderColor}`,
+                background: "#f0f0f0",
+                boxShadow: "0 0 0 1px #fff9",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div
+                style={{ flex: 1, backgroundColor: "#fff", overflow: "auto" }}
+              >
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Rnd>
+    );
+  }
+
+  // --------------------------------------------------
+  // WINDOWS XP RENDERER (Authentic, Inline)
+  // --------------------------------------------------
+  if (isXP) {
+    const xpTitleBg = win.focused
+      ? "linear-gradient(to bottom, #0058ee 0%, #3593ff 4%, #288eff 6%, #127dff 8%, #036ffc 10%, #0262ee 14%, #0057e5 20%, #0054e3 24%, #0055eb 56%, #005bf5 66%, #026afe 76%, #0062ef 86%, #0052d6 92%, #0040ab 94%, #003092 100%)"
+      : "linear-gradient(to bottom, #7697e7 0%, #7e9ee3 3%, #94afe8 6%, #97b4e9 8%, #82a5e4 14%, #7c9fe2 17%, #7996de 25%, #7b99e1 56%, #82a9e9 81%, #80a5e7 89%, #7b96e1 94%, #7a93df 97%, #abbae3 100%)";
+
+    return (
+      <Rnd
+        size={size}
+        position={position}
+        style={{ zIndex: win.z, transition: rndTransition }}
+        dragHandleClassName="window-header"
+        disableDragging={win.maximized}
+        enableResizing={!win.maximized}
+        onDragStart={() => {
+          setIsInteracting(true);
+          activate();
+        }}
+        onResizeStart={() => {
+          setIsInteracting(true);
+          activate();
+        }}
+        onDrag={handleDrag}
+        onDragStop={handleDragStop}
+        onMouseDown={activate}
+      >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: win.focused ? "#0831d9" : "#6582f5",
+            padding: "3px",
+            paddingBottom: "3px",
+            borderRadius: "8px 8px 0 0",
+            display: "flex",
+            flexDirection: "column",
+            boxShadow: "2px 2px 5px rgba(0,0,0,0.3)",
+            ...getStyles(),
+          }}
+        >
+          <div
+            className="window-header"
+            onDoubleClick={handleMaximizeToggle}
+            style={{
+              height: "30px",
+              background: xpTitleBg,
+              borderRadius: "5px 5px 0 0",
+              display: "flex",
+              alignItems: "center",
+              padding: "0 5px",
+              color: "white",
+              textShadow: "1px 1px 1px #000",
+              fontFamily: '"Tahoma", sans-serif',
+              fontWeight: "bold",
+              fontSize: "13px",
+              overflow: "visible",
+            }}
+          >
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                marginRight: "4px",
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
+              }}
+            >
+              <Icons.App />
+            </div>
+            <div
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                pointerEvents: "none",
+              }}
+            >
+              {windowTitle}
+            </div>
+            <div style={{ display: "flex", gap: "2px" }}>
+              <XPButton type="minimize" onClick={handleMinimize} />
+              <XPButton
+                type={win.maximized ? "restore" : "maximize"}
+                onClick={handleMaximizeToggle}
+              />
+              <XPButton type="close" onClick={handleClose} />
+            </div>
+          </div>
+          {/* XP Menu Bar Placeholder */}
+          {menuItems && (
+            <div
+              className="flex items-center px-1 border-b border-[#d4d0c8]"
+              style={{ backgroundColor: "#ece9d8", height: "20px" }}
+            >
+              {menuItems.map((item, i) => (
+                <button
+                  key={i}
+                  className="px-2 text-black hover:bg-[#316ac5] hover:text-white text-xs h-full flex items-center"
+                  onClick={item.action}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: "#fff",
+              margin: "0",
+              border: "1px solid #003092",
+              borderTop: "none",
+              overflow: "auto",
+              position: "relative",
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      </Rnd>
+    );
+  }
+
+  // --------------------------------------------------
+  // DEFAULT / WINDOWS 98 RENDERER (Classic Tailwind)
+  // --------------------------------------------------
   return (
     <Rnd
-      ref={rndRef}
-      size={
-        win.maximized
-          ? { width: vw, height: Math.max(0, vh - 40) }
-          : { width: win.width, height: win.height }
-      }
-      position={win.maximized ? { x: 0, y: 0 } : { x: win.x, y: win.y }}
+      size={size}
+      position={position}
+      style={{ zIndex: win.z, transition: rndTransition }}
+      dragHandleClassName="window-header"
+      disableDragging={win.maximized}
+      enableResizing={!win.maximized}
       onDragStart={() => {
         setIsInteracting(true);
         activate();
       }}
-      onDragStop={handleDragStop}
-      onDrag={handleDrag}
       onResizeStart={() => {
         setIsInteracting(true);
         activate();
       }}
-      onResizeStop={(e, dir, ref, d, pos) => {
-        setIsInteracting(false);
-        if (!win.maximized)
-          dispatch({
-            type: "UPDATE_WINDOW",
-            payload: {
-              id: win.id,
-              width: parseInt(ref.style.width),
-              height: parseInt(ref.style.height),
-              ...pos,
-            },
-          });
-      }}
-      dragHandleClassName="window-titlebar"
-      minWidth={200}
-      minHeight={100}
-      bounds="parent"
-      style={{
-        zIndex: win.z,
-        display: win.minimized ? "none" : "flex",
-        ...frameStyle,
-      }}
-      className={!isInteracting ? "transition-all duration-75" : ""}
-      disableDragging={win.maximized}
-      enableResizing={!win.maximized}
+      onDrag={handleDrag}
+      onDragStop={handleDragStop}
       onMouseDown={activate}
     >
-      {/* TITLE BAR */}
       <div
-        className="window-titlebar flex items-center justify-between select-none overflow-hidden shrink-0"
-        onDoubleClick={handleMaximizeToggle}
-        style={{
-          height: titleBarHeight,
-          background: win.focused ? "var(--os-accent)" : "var(--InactiveTitle)",
-          backgroundImage: isClassic
-            ? win.focused
-              ? "linear-gradient(to right, var(--ActiveTitle), var(--GradientActiveTitle))"
-              : "linear-gradient(to right, var(--InactiveTitle), var(--GradientInactiveTitle))"
-            : isXP
-              ? win.focused
-                ? "linear-gradient(to bottom, #0058ee 0%, #3b80f5 10%, #0058ee 100%)"
-                : "linear-gradient(to bottom, #7695ce 0%, #8da3d3 100%)"
-              : isWin7
-                ? "linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0) 100%)"
-                : undefined,
-          color: win.focused
-            ? "var(--ActiveTitleText)"
-            : "var(--InactiveTitleText)",
-          paddingLeft: "4px",
-          borderBottom: isWin7 ? "1px solid rgba(0,0,0,0.1)" : "none",
-        }}
+        className={`w-full h-full flex flex-col box-border p-[3px] bg-[var(--ButtonFace)] text-[var(--ButtonText)] font-[var(--os-font)] text-[12px]
+          border-t border-l border-[var(--ButtonHilight)] border-r border-b border-[var(--ButtonDkShadow)] shadow-[inset_1px_1px_0_0_var(--ButtonLight),inset_-1px_-1px_0_0_var(--ButtonShadow)]
+          transition-colors duration-500
+          ${win.maximized ? "!border-0 !p-0 !shadow-none" : ""}`}
+        style={getStyles()}
       >
-        <div className="flex items-center gap-2 pl-1 truncate">
-          {/* App Icon */}
-          <div className="w-4 h-4 text-current opacity-90">
-            <Icons.App />
+        {/* Title Bar */}
+        <div
+          className={`window-header flex items-center px-[2px] min-h-[18px] font-bold tracking-wide select-none
+            ${
+              win.focused
+                ? "bg-gradient-to-r from-[var(--ActiveTitle)] to-[var(--GradientActiveTitle)] text-[var(--ActiveTitleText)]"
+                : "bg-gradient-to-r from-[var(--InactiveTitle)] to-[var(--GradientInactiveTitle)] text-[var(--InactiveTitleText)]"
+            }`}
+          onDoubleClick={handleMaximizeToggle}
+        >
+          <div className="w-4 h-4 mr-[3px] flex items-center justify-center">
+            <div className="w-3 h-3 bg-white/30" />
           </div>
-          <span
-            className="text-xs font-bold truncate"
-            style={{
-              textShadow: isXP || isWin7 ? "0 0 2px rgba(0,0,0,0.5)" : "none",
-            }}
-          >
-            {getWindowTitle(win.id)}
-          </span>
+          <span className="flex-1 truncate pt-[1px]">{windowTitle}</span>
+          <div className="flex gap-[2px] ml-[2px]">
+            <ClassicButton type="minimize" onClick={handleMinimize} />
+            <ClassicButton
+              type="maximize"
+              onClick={handleMaximizeToggle}
+              isMaximized={win.maximized}
+            />
+            <ClassicButton type="close" onClick={handleClose} />
+          </div>
         </div>
 
-        <TitleBarControls
-          osIndex={state.osIndex}
-          onMinimize={handleMinimize}
-          onMaximize={handleMaximizeToggle}
-          onClose={handleClose}
-        />
-      </div>
-
-      {/* MENU BAR (Classic/Default only) */}
-      {(menuItems || isClassic) && (
-        <div
-          className="flex items-center px-1 bg-[var(--Menu)] text-[var(--MenuText)] border-b border-[var(--ButtonShadow)] h-[20px] select-none text-[11px]"
-          style={{ display: isClassic ? "flex" : "none" }}
-        >
-          {(
-            menuItems || [
-              { label: "File" },
-              { label: "Edit" },
-              { label: "View" },
-              { label: "Help" },
-            ]
-          ).map((item, idx) => (
-            <button
-              key={idx}
-              className="px-2 hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] disabled:text-[var(--GrayText)]"
-              onClick={item.action}
+        {/* Menu Bar */}
+        <div className="flex bg-[var(--Menu)] p-[1px_0] mt-[1px] min-h-[18px]">
+          {(menuItems || ["File", "Edit", "View", "Help"]).map((item) => (
+            <div
+              key={typeof item === "string" ? item : item.label}
+              className="px-[6px] py-[2px] cursor-default text-[var(--MenuText)] hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] select-none"
             >
-              {item.label}
-            </button>
+              <span className="underline">
+                {(typeof item === "string" ? item : item.label)[0]}
+              </span>
+              {(typeof item === "string" ? item : item.label).slice(1)}
+            </div>
           ))}
         </div>
-      )}
 
-      {/* CONTENT AREA */}
-      <div className="flex-1 overflow-auto bg-[var(--os-bg)] text-[var(--os-text)] relative">
-        {children}
+        {/* Content */}
+        <div className="flex-1 min-h-0 bg-white relative overflow-auto mt-[2px] border-t border-l border-[var(--ButtonShadow)] border-r border-b border-[var(--ButtonHilight)] shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
+          {children}
+        </div>
       </div>
     </Rnd>
   );
