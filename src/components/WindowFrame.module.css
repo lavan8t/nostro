@@ -1,0 +1,236 @@
+/* Window Frame Container */
+.window {
+  background-color: var(--ButtonFace);
+  color: var(--ButtonText);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 12px;
+
+  /* Layout Fixes */
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  /* Classic "Window" border (outset) */
+  border-top: 1px solid var(--ButtonHilight);
+  border-left: 1px solid var(--ButtonHilight);
+  border-right: 1px solid var(--ButtonDkShadow);
+  border-bottom: 1px solid var(--ButtonDkShadow);
+
+  box-shadow:
+    inset 1px 1px 0 0 var(--ButtonLight),
+    inset -1px -1px 0 0 var(--ButtonShadow);
+
+  padding: 3px; /* Slightly larger padding for the frame look */
+}
+
+/* Maximized Override */
+.maximized {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Titlebar */
+.titleBar {
+  background: var(--ActiveTitle);
+  background: linear-gradient(
+    90deg,
+    var(--ActiveTitle) 0%,
+    var(--GradientActiveTitle) 100%
+  );
+  color: var(--ActiveTitleText);
+  padding: 3px 2px;
+  min-height: 18px; /* Force height */
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.titleBarInactive {
+  background: var(--InactiveTitle);
+  background: linear-gradient(
+    90deg,
+    var(--InactiveTitle) 0%,
+    var(--GradientInactiveTitle) 100%
+  );
+  color: var(--InactiveTitleText);
+}
+
+.titleIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 3px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleText {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-top: 1px; /* Visual alignment */
+}
+
+.controls {
+  display: flex;
+  gap: 2px;
+  margin-left: 2px;
+}
+
+/* Window Buttons */
+.button {
+  width: 16px;
+  height: 14px;
+  background-color: var(--ButtonFace);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  position: relative;
+
+  /* Outset Button Border */
+  border-top: 1px solid var(--ButtonHilight);
+  border-left: 1px solid var(--ButtonHilight);
+  border-right: 1px solid var(--ButtonDkShadow);
+  border-bottom: 1px solid var(--ButtonDkShadow);
+  box-shadow:
+    inset -1px -1px 0 0 var(--ButtonShadow),
+    inset 1px 1px 0 0 var(--ButtonLight);
+}
+
+.button:active {
+  /* Inset Button Border */
+  border-top: 1px solid var(--ButtonDkShadow);
+  border-left: 1px solid var(--ButtonDkShadow);
+  border-right: 1px solid var(--ButtonHilight);
+  border-bottom: 1px solid var(--ButtonHilight);
+  box-shadow: inset 1px 1px 0 0 var(--ButtonShadow);
+}
+
+.button:active .icon {
+  transform: translate(1px, 1px);
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  pointer-events: none;
+}
+
+/* CSS Icons */
+.iconMinimize::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: 3px;
+  width: 6px;
+  height: 2px;
+  background-color: var(--ButtonText);
+}
+
+.iconMaximize::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 9px;
+  height: 8px;
+  border: 1px solid var(--ButtonText);
+  border-top-width: 2px;
+}
+
+.iconRestore::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ButtonText);
+  border-top-width: 2px;
+  background: var(--ButtonFace);
+  z-index: 2;
+}
+.iconRestore::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ButtonText);
+  border-top-width: 2px;
+  z-index: 1;
+}
+
+.iconClose::after,
+.iconClose::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  background-color: var(--ButtonText);
+}
+.iconClose::after {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.iconClose::before {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Menu Bar */
+.menuBar {
+  display: flex;
+  background-color: var(--Menu);
+  padding: 1px 0;
+  margin-top: 1px;
+  min-height: 18px;
+}
+
+.menuItem {
+  padding: 2px 6px;
+  cursor: default;
+  color: var(--MenuText);
+  user-select: none;
+}
+
+.menuItem:hover {
+  background-color: var(--Hilight);
+  color: var(--HilightText);
+}
+
+.hotkey {
+  text-decoration: underline;
+}
+
+/* Window Content Area */
+.content {
+  flex: 1;
+  min-height: 0; /* Critical for scrolling inside flex */
+  background-color: #fff;
+  position: relative;
+  overflow: auto;
+  margin-top: 2px;
+
+  /* Inset Border (Deep) */
+  border-top: 1px solid var(--ButtonShadow);
+  border-left: 1px solid var(--ButtonShadow);
+  border-right: 1px solid var(--ButtonHilight);
+  border-bottom: 1px solid var(--ButtonHilight);
+
+  box-shadow:
+    inset 1px 1px 0 0 var(--ButtonDkShadow),
+    inset -1px -1px 0 0 var(--ButtonLight);
+}
