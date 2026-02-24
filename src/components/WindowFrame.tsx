@@ -723,3 +723,4 @@ export default function WindowFrame({
     </Rnd>
   );
 }
+17b36771abef7d84dc1948c9
