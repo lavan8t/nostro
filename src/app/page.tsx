@@ -1,5 +1,5 @@
-import Desktop from "../components/Desktop";
+import BootManager from "../components/bootloader/BootManager";
 
 export default function Home() {
-  return <Desktop />;
+  return <BootManager />;
 }

@@ -25,13 +25,15 @@ export default function StartMenu() {
     dispatch({ type: "ADD_WINDOW", payload: newWindow });
     dispatch({ type: "CLOSE_START_MENU" });
   };
-
+  const handleLogout = () => {
+    localStorage.removeItem("nostro_booted");
+    dispatch({ type: "LOG_OUT" });
+  };
   const index = state.osIndex;
 
-  if (index === 3) return <Win10StartMenu handleLaunch={handleLaunch} />;
-  if (index === 2) return <Win7StartMenu handleLaunch={handleLaunch} />;
-  if (index === 1) return <WinXPStartMenu handleLaunch={handleLaunch} />;
+  if (index === 3) return <Win10StartMenu handleLaunch={handleLaunch} handleLogout={handleLogout} />;
+  if (index === 2) return <Win7StartMenu handleLaunch={handleLaunch} handleLogout={handleLogout} />;
+  if (index === 1) return <WinXPStartMenu handleLaunch={handleLaunch} handleLogout={handleLogout} />;
 
-  // Default / 98
-  return <WinClassicStartMenu handleLaunch={handleLaunch} osIndex={index} />;
+  return <WinClassicStartMenu handleLaunch={handleLaunch} handleLogout={handleLogout} osIndex={index} />;
 }

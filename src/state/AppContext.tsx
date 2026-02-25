@@ -71,6 +71,7 @@ export interface AppState {
   icons: DesktopIconState[];
   recycleBinFilled: boolean;
   autoArrange: boolean;
+  isBooted: boolean;
 }
 
 // --------------------------------------------------
@@ -91,13 +92,15 @@ export type Action =
   | { type: "SET_NOTEPAD_TEXT"; payload: string }
   | { type: "SET_PAINT_STROKES"; payload: Stroke[] }
   | {
-      type: "OPEN_CONTEXT_MENU";
-      payload: { x: number; y: number; items: MenuItem[] };
-    }
+    type: "OPEN_CONTEXT_MENU";
+    payload: { x: number; y: number; items: MenuItem[] };
+  }
   | { type: "CLOSE_CONTEXT_MENU" }
   | { type: "UPDATE_ICON_POS"; payload: { id: string; x: number; y: number } }
   | { type: "SET_AUTO_ARRANGE"; payload: boolean }
-  | { type: "EMPTY_RECYCLE_BIN" };
+  | { type: "EMPTY_RECYCLE_BIN" }
+  | { type: "BOOT_OS" }
+  | { type: "LOG_OUT" };
 
 // --------------------------------------------------
 // REDUCER
@@ -109,6 +112,7 @@ export const initialState: AppState = {
   windows: [],
   notepad: { text: "" },
   paint: { strokes: [] },
+  isBooted: false,
   contextMenu: { isOpen: false, x: 0, y: 0, items: [] },
   icons: [
     { id: "computer", x: 10, y: 10 },
@@ -283,9 +287,15 @@ export const appReducer = (state: AppState, action: Action): AppState => {
 
     case "EMPTY_RECYCLE_BIN":
       return { ...state, recycleBinFilled: false };
+    case "BOOT_OS":
+      return { ...state, isBooted: true };
+
+    case "LOG_OUT":
+      return { ...state, isBooted: false, windows: [], startMenuOpen: false }
 
     default:
       return state;
+
   }
 };
 

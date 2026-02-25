@@ -98,7 +98,7 @@ function MenuItem({ label, icon, onClick, hasSubmenu }: any) {
 // LAYOUTS
 // --------------------------------------------------
 
-export const Win7StartMenu = ({ handleLaunch }: { handleLaunch: LaunchFn }) => {
+export const Win7StartMenu = ({ handleLaunch, handleLogout }: { handleLaunch: LaunchFn; handleLogout: () => void }) => {
   return (
     <>
       <style
@@ -189,7 +189,7 @@ export const Win7StartMenu = ({ handleLaunch }: { handleLaunch: LaunchFn }) => {
             <Win7LinkRow label="Help and Support" />
           </div>
           <div className="mt-auto mb-2 px-3">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-sm w-fit ml-auto transition-all text-black win7-shutdown-btn">
+            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1.5 rounded-sm w-fit ml-auto transition-all text-black win7-shutdown-btn">
               <span className="text-xs font-semibold">Shut down</span>
               <div className="pl-1 border-l border-black/20 text-black/70">
                 <Icons.ArrowRight />
@@ -204,8 +204,10 @@ export const Win7StartMenu = ({ handleLaunch }: { handleLaunch: LaunchFn }) => {
 
 export const Win10StartMenu = ({
   handleLaunch,
+  handleLogout,
 }: {
   handleLaunch: LaunchFn;
+  handleLogout: () => void;
 }) => {
   return (
     <>
@@ -247,7 +249,9 @@ export const Win10StartMenu = ({
             <button className="w-[48px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
               <Icons.Settings />
             </button>
-            <button className="w-[48px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="w-[48px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
               <Icons.Power />
             </button>
           </div>
@@ -360,8 +364,10 @@ export const Win10StartMenu = ({
 
 export const WinXPStartMenu = ({
   handleLaunch,
+  handleLogout,
 }: {
   handleLaunch: LaunchFn;
+  handleLogout: () => void;
 }) => {
   return (
     <div
@@ -486,7 +492,7 @@ export const WinXPStartMenu = ({
           </div>
           <span className="text-sm">Log Off</span>
         </button>
-        <button className="flex items-center gap-1 text-white hover:brightness-110 ml-2">
+        <button onClick={handleLogout} className="flex items-center gap-1 text-white hover:brightness-110 ml-2">
           <div className="bg-[#d64a28] p-[2px] rounded-sm border border-white/50 shadow-sm">
             <Icons.Power />
           </div>
@@ -499,9 +505,11 @@ export const WinXPStartMenu = ({
 
 export const WinClassicStartMenu = ({
   handleLaunch,
+  handleLogout,
   osIndex,
 }: {
   handleLaunch: LaunchFn;
+  handleLogout: () => void;
   osIndex: number;
 }) => {
   return (
@@ -554,7 +562,7 @@ export const WinClassicStartMenu = ({
             onClick={() => handleLaunch("wnd-paint")}
           />
           <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-          <MenuItem label="Shut Down..." icon={<Icons.Power />} />
+          <MenuItem label="Shut Down..." icon={<Icons.Power />} onClick={handleLogout} />
         </div>
       </div>
     </div>
