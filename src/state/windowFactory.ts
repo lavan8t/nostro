@@ -18,6 +18,7 @@ export const makeWindow = (
     height: 480,
     z: 1,
     minimized: false,
+    maximized: false,
     focused: false,
   };
 

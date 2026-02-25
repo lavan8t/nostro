@@ -15,18 +15,15 @@ export default function BootManager() {
         setIsClient(true);
         const stored = localStorage.getItem("nostro_booted");
 
-        // Check if we should be booted or if we just logged out
         if (stored === "true" || state.isBooted) {
             setBootState("booted");
         } else {
-            // THIS is the fix: when state clears on logout, revert to splash screen
             setBootState("splash");
         }
     }, [state.isBooted]);
 
     if (!isClient) return null;
 
-    // If both the local state and global state agree we are booted, show the OS
     if (bootState === "booted" && state.isBooted) {
         return <Desktop />;
     }

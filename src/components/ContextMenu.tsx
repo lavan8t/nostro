@@ -52,9 +52,9 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         style={
           item.disabled
             ? {
-                color: "var(--GrayText)",
-                textShadow: "1px 1px 0 var(--ButtonHilight)",
-              }
+              color: "var(--GrayText)",
+              textShadow: "1px 1px 0 var(--ButtonHilight)",
+            }
             : {}
         }
       >
@@ -68,9 +68,9 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
           style={
             item.disabled
               ? {
-                  color: "var(--GrayText)",
-                  textShadow: "1px 1px 0 var(--ButtonHilight)",
-                }
+                color: "var(--GrayText)",
+                textShadow: "1px 1px 0 var(--ButtonHilight)",
+              }
               : {}
           }
         >
@@ -142,7 +142,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
     >
       {/* Gutter Icon Area (Transparent over global gutter) */}
       <div className="w-[26px] shrink-0 flex items-center justify-center">
-        {/* Icon would go here */}
+        { }
       </div>
 
       <span
@@ -246,7 +246,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 };
 
 // --------------------------------------------------
-// 4. WINDOWS 10 / 11 (Modern)
+// 4. WINDOWS 10  (Modern)
 // --------------------------------------------------
 
 const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {

@@ -156,7 +156,7 @@ export default function Desktop() {
         })}
       </div>
 
-      {/* WindowLauncher Removed */}
+      { }
       <Taskbar />
     </main>
   );

@@ -7,26 +7,19 @@ import { osThemes, ThemeTokens } from "../themes/osThemes";
 export default function ThemeCrossfade() {
   const { state } = useAppContext();
 
-  // State to manage the visual layers
-  // We deliberately do NOT sync this with state.osIndex immediately to allow animation
+
   const [currentLayerIndex, setCurrentLayerIndex] = useState(state.osIndex);
   const [nextLayerIndex, setNextLayerIndex] = useState<number | null>(null);
-  const [opacity, setOpacity] = useState(0); // 0 means current is visible, 1 means next is visible
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-    // If the requested OS index is different from what we are currently showing...
+
     if (state.osIndex !== currentLayerIndex) {
-      // If we are already animating to a target, and the target changes,
-      // we ideally want to just jump to the new target or finish the old one.
-      // Simplified robust approach:
-      // 1. Set the 'Next' layer to the new target.
-      // 2. Fade it in.
-      // 3. When done, swap 'Next' to 'Current' and reset.
+
 
       setNextLayerIndex(state.osIndex);
 
-      // Small timeout to ensure DOM has rendered the new background image in the 'next' div
-      // before we start fading opacity.
+
       const raf = requestAnimationFrame(() => {
         const raf2 = requestAnimationFrame(() => {
           setOpacity(1);
@@ -34,15 +27,15 @@ export default function ThemeCrossfade() {
       });
 
       const timeout = setTimeout(() => {
-        // Animation Complete
+
         setCurrentLayerIndex(state.osIndex);
         setNextLayerIndex(null);
         setOpacity(0);
-      }, 600); // Matches duration-600
+      }, 600);
 
       return () => {
         clearTimeout(timeout);
-        // We do NOT cancel the animation frame logic aggressively to avoid stutter
+
       };
     }
   }, [state.osIndex, currentLayerIndex]);
@@ -51,7 +44,7 @@ export default function ThemeCrossfade() {
     if (index === null) return "none";
     const safeIndex = osThemes[index] ? index : 3;
     const theme = osThemes[safeIndex];
-    // Handle dual/single theme structure
+
     const tokens =
       "light" in theme && "dark" in theme
         ? theme.dark.tokens

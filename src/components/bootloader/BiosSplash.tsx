@@ -3,11 +3,10 @@
 import React from "react";
 
 export default function BiosSplash({ onComplete }: { onComplete: () => void }) {
-    // We removed the useEffect timeout so it stays here infinitely until clicked
 
     return (
         <div
-            onClick={onComplete} // Clicking anywhere triggers the transition to the OS Select screen
+            onClick={onComplete}
             className="h-screen w-screen bg-black flex flex-col items-center justify-center text-white cursor-pointer select-none relative"
         >
             <div
@@ -21,7 +20,7 @@ export default function BiosSplash({ onComplete }: { onComplete: () => void }) {
                 Motherboard BIOS Revision 1.0.4
             </div>
 
-            {/* Blinking prompt to let the user know they need to click */}
+
             <div className="mt-16 text-gray-500 font-mono text-sm animate-pulse">
                 Click anywhere to continue...
             </div>

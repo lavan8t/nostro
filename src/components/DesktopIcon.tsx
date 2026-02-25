@@ -75,12 +75,12 @@ export default function DesktopIcon({
   if (icon.id === "computer") {
     if (osIndex === 0 || osIndex === 1) label = "My Computer";
     else if (osIndex === 2) label = "Computer";
-    else label = "This PC"; // Default for Win10
+    else label = "This PC";
   } else if (icon.id === "recycle") {
     label = "Recycle Bin";
   }
 
-  // Determine Icon Path - Removed win11 fallback
+
   let iconPath = "";
   const osDir = ["win98", "winxp", "win7", "win10"][state.osIndex] || "win10";
 
@@ -196,13 +196,12 @@ export default function DesktopIcon({
         />
       </div>
       <div
-        className={`text-[11px] text-center leading-tight px-1 rounded-sm ${
-          isSelected
+        className={`text-[11px] text-center leading-tight px-1 rounded-sm ${isSelected
             ? isClassic
               ? "bg-[#000080] text-white"
               : "bg-[#316ac5] bg-opacity-60 text-white"
             : ""
-        }`}
+          }`}
         style={!isSelected ? textStyle : {}}
       >
         <CrossfadeText text={label} />
