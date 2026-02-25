@@ -97,21 +97,21 @@ function XPButton({
       }}
     >
       {type === "minimize" && (
-        <div className="absolute left-[4px] top-[13px] w-[8px] h-[3px] bg-white shadow-[0_1px_0_rgba(0,0,0,0.3)]" />
+        <div className="absolute left-1 top-3.25 w-2 h-0.75 bg-white shadow-[0_1px_0_rgba(0,0,0,0.3)]" />
       )}
       {type === "maximize" && (
-        <div className="absolute left-[4px] top-[4px] w-[12px] h-[12px] shadow-[inset_0_3px_0_0_white,inset_0_0_0_1px_white]" />
+        <div className="absolute left-1 top-1 w-3 h-3 shadow-[inset_0_3px_0_0_white,inset_0_0_0_1px_white]" />
       )}
       {type === "restore" && (
         <>
-          <div className="absolute left-[7px] top-[4px] w-[8px] h-[8px] shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white]" />
-          <div className="absolute left-[4px] top-[7px] w-[8px] h-[8px] bg-[#136dff] shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white] z-10" />
+          <div className="absolute left-1.75 top-1 w-2 h-2 shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white]" />
+          <div className="absolute left-1 top-1.75 w-2 h-2 bg-[#136dff] shadow-[inset_0_2px_0_0_white,inset_0_0_0_1px_white] z-10" />
         </>
       )}
       {type === "close" && (
         <svg
           viewBox="0 0 10 10"
-          className="w-[10px] h-[10px] text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.3)]"
+          className="w-2.5 h-2.5 text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.3)]"
           style={{ filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.25))" }}
         >
           <path d="M0 0 L10 10 M10 0 L0 10" stroke="white" strokeWidth="2" />
@@ -135,25 +135,25 @@ function ClassicButton({
     <button
       onClick={onClick}
       onMouseDown={(e) => e.stopPropagation()}
-      className="w-[16px] h-[14px] flex items-center justify-center bg-[var(--ButtonFace)] border-t border-l border-[var(--ButtonHilight)] border-r border-b border-[var(--ButtonDkShadow)] active:border-t-[var(--ButtonDkShadow)] active:border-l-[var(--ButtonDkShadow)] active:border-r-[var(--ButtonHilight)] active:border-b-[var(--ButtonHilight)] shadow-[inset_-1px_-1px_0_0_var(--ButtonShadow),inset_1px_1px_0_0_var(--ButtonLight)] active:shadow-[inset_1px_1px_0_0_var(--ButtonShadow)] p-0 m-0 group"
+      className="w-4 h-3.5 flex items-center justify-center bg-(--ButtonFace) border-t border-l border-(--ButtonHilight) border-r border-b active:border-t-(--ButtonDkShadow) active:border-l-(--ButtonDkShadow) active:border-r-(--ButtonHilight) active:border-b-(--ButtonHilight) shadow-[inset_-1px_-1px_0_0_var(--ButtonShadow),inset_1px_1px_0_0_var(--ButtonLight)] active:shadow-[inset_1px_1px_0_0_var(--ButtonShadow)] p-0 m-0 group"
     >
-      <div className="w-full h-full relative group-active:translate-x-[1px] group-active:translate-y-[1px]">
+      <div className="w-full h-full relative group-active:translate-x-px group-active:translate-y-px">
         {type === "minimize" && (
-          <div className="absolute left-[3px] bottom-[3px] w-[6px] h-[2px] bg-[var(--ButtonText)]" />
+          <div className="absolute left-0.75 bottom-0.75 w-1.5 h-0.5 bg-(--ButtonText)" />
         )}
         {type === "maximize" && !isMaximized && (
-          <div className="absolute top-[2px] left-[2px] w-[9px] h-[8px] border-t-[2px] border border-[var(--ButtonText)]" />
+          <div className="absolute top-0.5 left-0.5 w-2.25 h-2 border-t-2 border border-(--ButtonText)" />
         )}
         {type === "maximize" && isMaximized && (
           <>
-            <div className="absolute bottom-[3px] left-[1px] w-[7px] h-[7px] border-t-[2px] border border-[var(--ButtonText)] bg-[var(--ButtonFace)] z-[2]" />
-            <div className="absolute top-[1px] right-[2px] w-[7px] h-[7px] border-t-[2px] border border-[var(--ButtonText)] z-[1]" />
+            <div className="absolute bottom-0.75 left-px w-1.75 h-1.75 border-t-2 border border-(--ButtonText) bg-(--ButtonFace) z-2" />
+            <div className="absolute top-px right-0.5 w-1.75 h-1.75 border-t-2 border border-(--ButtonText) z-1" />
           </>
         )}
         {type === "close" && (
           <>
-            <div className="absolute top-1/2 left-1/2 w-[12px] h-[2px] bg-[var(--ButtonText)] -translate-x-1/2 -translate-y-1/2 rotate-45" />
-            <div className="absolute top-1/2 left-1/2 w-[12px] h-[2px] bg-[var(--ButtonText)] -translate-x-1/2 -translate-y-1/2 -rotate-45" />
+            <div className="absolute top-1/2 left-1/2 w-3 h-0.5 bg-(--ButtonText) -translate-x-1/2 -translate-y-1/2 rotate-45" />
+            <div className="absolute top-1/2 left-1/2 w-3 h-0.5 bg-(--ButtonText) -translate-x-1/2 -translate-y-1/2 -rotate-45" />
           </>
         )}
       </div>
@@ -465,28 +465,28 @@ export default function WindowFrame({
                 <button
                   onClick={handleMinimize}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-[28px] h-[18px] border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                  className="w-7 h-[18h-4.5er-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
                 >
                   <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute left-[9px] bottom-[4px] w-[10px] h-[2px] bg-[#000]" />
+                    <div className="absolute left-2.25 bottom-1 w-2.5 h-0.5 bg-black" />
                   </div>
                 </button>
                 <button
                   onClick={handleMaximizeToggle}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-[28px] h-[18px] border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                  className="w-7 h-4.5 border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
                 >
                   <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-[4px] left-[9px] w-[10px] h-[8px] border border-[#000]" />
+                    <div className="absolute top-1 left-2.25 w-2.5 h-2 border border-black" />
                   </div>
                 </button>
                 <button
                   onClick={handleClose}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-[40px] h-[18px] rounded-[0_0_5px_0] hover:bg-[#d54f36] relative group"
+                  className="w-10 h-4.5 rounded-[0_0_5px_0] hover:bg-[#d54f36] relative group"
                 >
                   <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-[4px] left-[14px] w-[12px] h-[10px] text-[#000] group-hover:text-white font-sans font-bold leading-[10px]">
+                    <div className="absolute top-1 left-3.5 w-3 h-2.5 text-black group-hover:text-white font-sans font-bold leading-2.5">
                       x
                     </div>
                   </div>
@@ -669,27 +669,27 @@ export default function WindowFrame({
       onMouseDown={activate}
     >
       <div
-        className={`w-full h-full flex flex-col box-border p-[3px] bg-[var(--ButtonFace)] text-[var(--ButtonText)] font-[var(--os-font)] text-[12px]
-          border-t border-l border-[var(--ButtonHilight)] border-r border-b border-[var(--ButtonDkShadow)] shadow-[inset_1px_1px_0_0_var(--ButtonLight),inset_-1px_-1px_0_0_var(--ButtonShadow)]
+        className={`w-full h-full flex flex-col box-border p-0.75 bg-(--ButtonFace) text-(--ButtonText) font-(--os-font) text-[12px]
+          border-t border-l border-r border-b border-(--ButtonDkShadow) shadow-[inset_1px_1px_0_0_var(--ButtonLight),inset_-1px_-1px_0_0_var(--ButtonShadow)]
           transition-colors duration-500
-          ${win.maximized ? "!border-0 !p-0 !shadow-none" : ""}`}
+          ${win.maximized ? "border-0! p-0! shadow-none!" : ""}`}
         style={getStyles()}
       >
         {/* Title Bar */}
         <div
-          className={`window-header flex items-center px-[2px] min-h-[18px] font-bold tracking-wide select-none
+          className={`window-header flex items-center px-0.5 min-h-4.5 font-bold tracking-wide select-none
             ${
               win.focused
-                ? "bg-gradient-to-r from-[var(--ActiveTitle)] to-[var(--GradientActiveTitle)] text-[var(--ActiveTitleText)]"
-                : "bg-gradient-to-r from-[var(--InactiveTitle)] to-[var(--GradientInactiveTitle)] text-[var(--InactiveTitleText)]"
+                ? "bg-linear-to-r from-(--ActiveTitle) to-(--GradientActiveTitle) text-(--ActiveTitleText)"
+                : "bg-linear-to-r from-(--InactiveTitle) to-(--GradientInactiveTitle) text-(--InactiveTitleText)"
             }`}
           onDoubleClick={handleMaximizeToggle}
         >
-          <div className="w-4 h-4 mr-[3px] flex items-center justify-center">
+          <div className="w-4 h-4 mr-0.75 flex items-center justify-center">
             <div className="w-3 h-3 bg-white/30" />
           </div>
-          <span className="flex-1 truncate pt-[1px]">{windowTitle}</span>
-          <div className="flex gap-[2px] ml-[2px]">
+          <span className="flex-1 truncate pt-px">{windowTitle}</span>
+          <div className="flex gap-0.5 ml-0.5">
             <ClassicButton type="minimize" onClick={handleMinimize} />
             <ClassicButton
               type="maximize"
@@ -701,11 +701,11 @@ export default function WindowFrame({
         </div>
 
         {/* Menu Bar */}
-        <div className="flex bg-[var(--Menu)] p-[1px_0] mt-[1px] min-h-[18px]">
+        <div className="flex bg-(--Menu) p-[1px_0] mt-px min-h-4.5">
           {(menuItems || ["File", "Edit", "View", "Help"]).map((item) => (
             <div
               key={typeof item === "string" ? item : item.label}
-              className="px-[6px] py-[2px] cursor-default text-[var(--MenuText)] hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] select-none"
+              className="px-1.5 py-0.5 cursor-default text-(--MenuText) hover:bg-(--Hilight) hover:text-(--HilightText) select-none"
             >
               <span className="underline">
                 {(typeof item === "string" ? item : item.label)[0]}
@@ -716,10 +716,11 @@ export default function WindowFrame({
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 bg-white relative overflow-auto mt-[2px] border-t border-l border-[var(--ButtonShadow)] border-r border-b border-[var(--ButtonHilight)] shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
+        <div className="flex-1 min-h-0 bg-white relative overflow-auto mt-0.5 border-t border-l border-(--ButtonShadow) border-r border-b shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
           {children}
         </div>
       </div>
     </Rnd>
   );
 }
+17b36771abef7d84dc1948c9
