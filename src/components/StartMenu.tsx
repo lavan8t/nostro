@@ -27,6 +27,8 @@ export default function StartMenu() {
   };
   const handleLogout = () => {
     localStorage.removeItem("nostro_booted");
+    localStorage.removeItem("nostro_selected_os");
+    localStorage.removeItem("nostro_logged_in");
     dispatch({ type: "LOG_OUT" });
   };
   const index = state.osIndex;

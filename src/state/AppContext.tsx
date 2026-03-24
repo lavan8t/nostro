@@ -72,6 +72,7 @@ export interface AppState {
   recycleBinFilled: boolean;
   autoArrange: boolean;
   isBooted: boolean;
+  isLoggedIn: boolean;
 }
 
 // --------------------------------------------------
@@ -100,6 +101,7 @@ export type Action =
   | { type: "SET_AUTO_ARRANGE"; payload: boolean }
   | { type: "EMPTY_RECYCLE_BIN" }
   | { type: "BOOT_OS" }
+  | { type: "LOG_IN" }
   | { type: "LOG_OUT" };
 
 // --------------------------------------------------
@@ -113,6 +115,7 @@ export const initialState: AppState = {
   notepad: { text: "" },
   paint: { strokes: [] },
   isBooted: false,
+  isLoggedIn: false,
   contextMenu: { isOpen: false, x: 0, y: 0, items: [] },
   icons: [
     { id: "computer", x: 10, y: 10 },
@@ -287,11 +290,15 @@ export const appReducer = (state: AppState, action: Action): AppState => {
 
     case "EMPTY_RECYCLE_BIN":
       return { ...state, recycleBinFilled: false };
+    
     case "BOOT_OS":
       return { ...state, isBooted: true };
 
+    case "LOG_IN":
+      return { ...state, isLoggedIn: true };
+
     case "LOG_OUT":
-      return { ...state, isBooted: false, windows: [], startMenuOpen: false }
+      return { ...state, isBooted: false, isLoggedIn: false, windows: [], startMenuOpen: false };
 
     default:
       return state;
