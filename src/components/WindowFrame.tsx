@@ -678,10 +678,9 @@ export default function WindowFrame({
         {/* Title Bar */}
         <div
           className={`window-header flex items-center px-0.5 min-h-4.5 font-bold tracking-wide select-none
-            ${
-              win.focused
-                ? "bg-linear-to-r from-(--ActiveTitle) to-(--GradientActiveTitle) text-(--ActiveTitleText)"
-                : "bg-linear-to-r from-(--InactiveTitle) to-(--GradientInactiveTitle) text-(--InactiveTitleText)"
+            ${win.focused
+              ? "bg-linear-to-r from-(--ActiveTitle) to-(--GradientActiveTitle) text-(--ActiveTitleText)"
+              : "bg-linear-to-r from-(--InactiveTitle) to-(--GradientInactiveTitle) text-(--InactiveTitleText)"
             }`}
           onDoubleClick={handleMaximizeToggle}
         >

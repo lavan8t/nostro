@@ -246,7 +246,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 };
 
 // --------------------------------------------------
-// 4. WINDOWS 10 / 11 (Modern)
+// 4. WINDOWS 10  (Modern)
 // --------------------------------------------------
 
 const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
