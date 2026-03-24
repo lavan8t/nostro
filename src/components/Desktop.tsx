@@ -7,6 +7,7 @@ import ThemeCrossfade from "./ThemeCrossfade";
 import WindowFrame, { SnapRect } from "./WindowFrame";
 import Notepad, { getNotepadMenus } from "../apps/Notepad";
 import ContextMenu from "./ContextMenu";
+import DesktopIcon from "./DesktopIcon";
 
 // --------------------------------------------------
 // HOOKS
@@ -63,6 +64,8 @@ export default function Desktop() {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    const clickX = e.clientX;
+    const clickY = e.clientY;
 
     // Define Desktop Context Menu Items
     const items: MenuItem[] = [
@@ -84,11 +87,63 @@ export default function Desktop() {
       {
         label: "New",
         submenu: [
-          { label: "Folder", action: () => console.log("New Folder") },
-          { label: "Shortcut", action: () => console.log("New Shortcut") },
+          {
+            label: "Folder",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `folder-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "folder",
+                  label: "New Folder",
+                },
+              }),
+          },
+          {
+            label: "Shortcut",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `shortcut-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "shortcut",
+                  label: "New Shortcut",
+                },
+              }),
+          },
           { separator: true, label: "" },
-          { label: "Text Document", action: () => console.log("New Text") },
-          { label: "Bitmap Image", action: () => console.log("New BMP") },
+          {
+            label: "Text Document",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `text-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "text",
+                  label: "New Text Document.txt",
+                },
+              }),
+          },
+          {
+            label: "Bitmap Image",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `bitmap-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "bitmap",
+                  label: "New Bitmap Image.bmp",
+                },
+              }),
+          },
         ],
       },
       { separator: true, label: "" },
@@ -126,7 +181,7 @@ export default function Desktop() {
       {/* Snap Preview Overlay */}
       {snapPreview && (
         <div
-          className="absolute z-[5] pointer-events-none transition-all duration-200"
+          className="absolute z-5 pointer-events-none transition-all duration-200"
           style={{
             left: snapPreview.x,
             top: snapPreview.y,
@@ -138,8 +193,15 @@ export default function Desktop() {
         />
       )}
 
+      {/* Desktop Icons */}
+      <div className="absolute top-0 left-0 right-0 bottom-10 z-2">
+        {state.icons.map((icon, index) => (
+          <DesktopIcon key={icon.id} icon={icon} index={index} />
+        ))}
+      </div>
+
       {/* Window Layer */}
-      <div className="absolute top-0 left-0 right-0 bottom-[40px] z-10">
+      <div className="absolute top-0 left-0 right-0 bottom-10 z-10">
         {visibleWindows.map((win) => {
           const { content, menus } = getAppContent(win.id);
           return (

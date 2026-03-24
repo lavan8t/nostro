@@ -59,6 +59,8 @@ export interface DesktopIconState {
   y: number;
   gridX?: number;
   gridY?: number;
+  type?: string;
+  label?: string;
 }
 
 export interface AppState {
@@ -97,7 +99,9 @@ export type Action =
   | { type: "CLOSE_CONTEXT_MENU" }
   | { type: "UPDATE_ICON_POS"; payload: { id: string; x: number; y: number } }
   | { type: "SET_AUTO_ARRANGE"; payload: boolean }
-  | { type: "EMPTY_RECYCLE_BIN" };
+  | { type: "EMPTY_RECYCLE_BIN" }
+  | { type: "ADD_ICON"; payload: DesktopIconState }
+  | { type: "REMOVE_ICON"; payload: string };
 
 // --------------------------------------------------
 // REDUCER
@@ -283,6 +287,15 @@ export const appReducer = (state: AppState, action: Action): AppState => {
 
     case "EMPTY_RECYCLE_BIN":
       return { ...state, recycleBinFilled: false };
+
+    case "ADD_ICON":
+      return { ...state, icons: [...state.icons, action.payload] };
+
+    case "REMOVE_ICON":
+      return {
+        ...state,
+        icons: state.icons.filter((icon) => icon.id !== action.payload),
+      };
 
     default:
       return state;

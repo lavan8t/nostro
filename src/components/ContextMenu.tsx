@@ -27,7 +27,7 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 
   if (item.separator) {
     return (
-      <div className="h-[2px] my-[1px] border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)]" />
+      <div className="h-0.5 my-px border-t border-(--ButtonShadow) border-b" />
     );
   }
 
@@ -38,7 +38,7 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center px-4 py-[1px] cursor-default select-none"
+      className="flex items-center px-4 py-px cursor-default select-none"
       style={{
         backgroundColor: isActive ? "var(--Hilight)" : "transparent",
         color: isActive ? "var(--HilightText)" : "var(--MenuText)",
@@ -100,7 +100,7 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 
       {/* Nested Menu */}
       {item.submenu && isHovered && (
-        <div className="absolute left-full top-[-3px] ml-[-3px]">
+        <div className="absolute left-full -top-0.75 -ml-0.75">
           <SubMenu items={item.submenu} osIndex={0} />
         </div>
       )}
@@ -117,9 +117,9 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 
   if (item.separator) {
     return (
-      <div className="flex my-[1px]">
-        <div className="w-[28px] shrink-0 bg-[#ECE9D8]" /> {/* Gutter skip */}
-        <div className="flex-1 h-[1px] bg-[#aca899] mr-1" />
+      <div className="flex my-px">
+        <div className="w-7 shrink-0 bg-[#ECE9D8]" /> {/* Gutter skip */}
+        <div className="flex-1 h-px bg-[#aca899] mr-1" />
       </div>
     );
   }
@@ -131,7 +131,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center pr-2 py-[1px] cursor-default select-none relative"
+      className="flex items-center pr-2 py-px cursor-default select-none relative"
       style={{
         backgroundColor: isActive ? "#316AC5" : "transparent",
         color: isActive ? "white" : "black",
@@ -141,7 +141,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       }}
     >
       {/* Gutter Icon Area (Transparent over global gutter) */}
-      <div className="w-[26px] shrink-0 flex items-center justify-center">
+      <div className="w-6.5 shrink-0 flex items-center justify-center">
         {/* Icon would go here */}
       </div>
 
@@ -175,7 +175,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       )}
 
       {item.submenu && isHovered && (
-        <div className="absolute left-full top-[-1px] ml-[-2px]">
+        <div className="absolute left-full -top-px -ml-0.5">
           <SubMenu items={item.submenu} osIndex={1} />
         </div>
       )}
@@ -192,9 +192,9 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
 
   if (item.separator) {
     return (
-      <div className="my-[3px] h-[2px] relative">
-        <div className="absolute left-[34px] right-1 top-0 h-[1px] bg-[#e0e0e0]" />
-        <div className="absolute left-[34px] right-1 top-[1px] h-[1px] bg-white" />
+      <div className="my-0.75 h-0.5 relative">
+        <div className="absolute left-8.5 right-1 top-0 h-px bg-[#e0e0e0]" />
+        <div className="absolute left-8.5 right-1 top-px h-px bg-white" />
       </div>
     );
   }
@@ -206,7 +206,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center px-1 py-[3px] cursor-default select-none mx-[2px] rounded-[2px] relative"
+      className="flex items-center px-1 py-0.75 cursor-default select-none mx-0.5 rounded-xs relative"
       style={{
         background: isActive
           ? "linear-gradient(to bottom, #eaf6fd 0%, #d9f0fc 100%)"
@@ -219,7 +219,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       }}
     >
       {/* Icon Area */}
-      <div className="w-[28px] shrink-0 flex items-center justify-center">
+      <div className="w-7 shrink-0 flex items-center justify-center">
         {/* Icon */}
       </div>
 
@@ -237,7 +237,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       )}
 
       {item.submenu && isHovered && (
-        <div className="absolute left-full top-[-4px] ml-[-1px]">
+        <div className="absolute left-full -top-1 -ml-px">
           <SubMenu items={item.submenu} osIndex={2} />
         </div>
       )}
@@ -253,7 +253,7 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
   const { isHovered, setIsHovered, handleClick } = useMenuLogic(item, dispatch);
 
   if (item.separator) {
-    return <div className="h-[1px] bg-[#454545] my-[4px] mx-1" />;
+    return <div className="h-px bg-[#454545] my-1 mx-1" />;
   }
 
   const isActive = isHovered && !item.disabled;
@@ -263,7 +263,7 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center px-2 py-[4px] cursor-default select-none relative"
+      className="flex items-center px-2 py-1 cursor-default select-none relative"
       style={{
         backgroundColor: isActive ? "#3a3a3a" : "transparent",
         color: item.disabled ? "#666" : "white",
@@ -271,7 +271,7 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         fontSize: "13px",
       }}
     >
-      <div className="w-[32px] shrink-0" /> {/* Icon Placeholder */}
+      <div className="w-8 shrink-0" /> {/* Icon Placeholder */}
       <span className="flex-1">{item.label}</span>
       {item.shortcut && (
         <span className="ml-4 opacity-60 text-xs">{item.shortcut}</span>
@@ -284,7 +284,7 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         </div>
       )}
       {item.submenu && isHovered && (
-        <div className="absolute left-full top-[-4px] ml-[0px]">
+        <div className="absolute left-full -top-1 ml-0">
           <SubMenu items={item.submenu} osIndex={3} />
         </div>
       )}
@@ -309,7 +309,7 @@ const SubMenu = ({
   if (osIndex === 0) {
     return (
       <div
-        className="min-w-[150px] p-[2px] z-[99999]"
+        className="min-w-37.5 p-0.5 z-99999"
         style={{
           backgroundColor: "var(--ButtonFace)",
           borderTop: "1px solid var(--ButtonHilight)",
@@ -331,14 +331,14 @@ const SubMenu = ({
   if (osIndex === 1) {
     return (
       <div
-        className="min-w-[150px] p-[2px] z-[99999] bg-white relative"
+        className="min-w-37.5 p-0.5 z-99999 bg-white relative"
         style={{
           border: "1px solid #999",
           boxShadow: "4px 4px 3px rgba(0,0,0,0.2)",
         }}
       >
         {/* XP Gutter */}
-        <div className="absolute left-[2px] top-[2px] bottom-[2px] w-[26px] bg-[#ECE9D8] z-0 pointer-events-none" />
+        <div className="absolute left-0.5 top-0.5 bottom-0.5 w-6.5 bg-[#ECE9D8] z-0 pointer-events-none" />
         <div className="relative z-10">
           {items.map((item, idx) => (
             <WinXPItem key={idx} item={item} dispatch={dispatch} />
@@ -352,14 +352,14 @@ const SubMenu = ({
   if (osIndex === 2) {
     return (
       <div
-        className="min-w-[150px] p-[2px] z-[99999] bg-[#F0F0F0] relative"
+        className="min-w-37.5 p-0.5 z-99999 bg-[#F0F0F0] relative"
         style={{
           border: "1px solid #979797",
           boxShadow: "4px 4px 5px rgba(0,0,0,0.2)",
         }}
       >
         {/* Win7 Gutter */}
-        <div className="absolute left-0 top-0 bottom-0 w-[34px] border-r border-[#e2e3e3] bg-[#f0f0f0] z-0 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-8.5 border-r border-[#e2e3e3] bg-[#f0f0f0] z-0 pointer-events-none" />
         <div className="relative z-10">
           {items.map((item, idx) => (
             <Win7Item key={idx} item={item} dispatch={dispatch} />
@@ -372,7 +372,7 @@ const SubMenu = ({
   // WIN 10/11
   return (
     <div
-      className="min-w-[200px] py-[4px] z-[99999] flex flex-col"
+      className="min-w-50 py-1 z-99999 flex flex-col"
       style={{
         backgroundColor: "#2b2b2b", // Dark Acrylic-ish
         border: "1px solid #1f1f1f",
@@ -415,7 +415,7 @@ export default function ContextMenu() {
   return (
     <div
       ref={ref}
-      className="fixed z-[99999]"
+      className="fixed z-99999"
       style={{ left: contextMenu.x, top: contextMenu.y }}
     >
       <SubMenu items={contextMenu.items} osIndex={osIndex} />

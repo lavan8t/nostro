@@ -51,6 +51,67 @@ const CrossfadeText = ({ text }: { text: string }) => {
 };
 
 // --------------------------------------------------
+// HELPER: Crossfade Image
+// --------------------------------------------------
+
+const CrossfadeImage = ({ src, alt }: { src: string; alt: string }) => {
+  const [layers, setLayers] = useState<{
+    current: string;
+    prev: string | null;
+  }>({ current: src, prev: null });
+  const [showNext, setShowNext] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (src !== layers.current) {
+      setLayers((l) => ({ current: src, prev: l.current }));
+      setShowNext(false);
+      setHasError(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setShowNext(true);
+        });
+      });
+      const timer = setTimeout(() => {
+        setLayers({ current: src, prev: null });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [src]);
+
+  return (
+    <div className="relative w-8 h-8">
+      {layers.prev && (
+        <img
+          src={layers.prev}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-500"
+          style={{ opacity: showNext ? 0 : 1 }}
+          draggable={false}
+        />
+      )}
+      {!hasError && src ? (
+        <img
+          src={layers.current}
+          alt={alt}
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-500"
+          style={{ opacity: showNext ? 1 : 0 }}
+          draggable={false}
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-sm bg-gray-400/40 transition-opacity duration-500"
+          style={{ opacity: showNext ? 1 : 0 }}
+        >
+          <div className="w-3 h-3 bg-white/40 rounded-sm" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --------------------------------------------------
 // COMPONENT
 // --------------------------------------------------
 
@@ -70,25 +131,34 @@ export default function DesktopIcon({
   const osIndex = state.osIndex;
   const isClassic = osIndex <= 1;
 
-  // Determine Label
-  let label = "Icon";
-  if (icon.id === "computer") {
+  // Determine Label & Type
+  const iconType = icon.type || icon.id;
+  let label = icon.label || "Icon";
+  if (iconType === "computer") {
     if (osIndex === 0 || osIndex === 1) label = "My Computer";
     else if (osIndex === 2) label = "Computer";
-    else label = "This PC"; // Default for Win10
-  } else if (icon.id === "recycle") {
+    else label = "This PC";
+  } else if (iconType === "recycle") {
     label = "Recycle Bin";
   }
 
-  // Determine Icon Path - Removed win11 fallback
+  // Determine Icon Path
   let iconPath = "";
   const osDir = ["win98", "winxp", "win7", "win10"][state.osIndex] || "win10";
 
-  if (icon.id === "computer") {
+  if (iconType === "computer") {
     iconPath = `/assets/${osDir}/icons/computer.png`;
-  } else if (icon.id === "recycle") {
+  } else if (iconType === "recycle") {
     const status = state.recycleBinFilled ? "full" : "empty";
     iconPath = `/assets/${osDir}/icons/recycle_bin_${status}.png`;
+  } else if (iconType === "folder") {
+    iconPath = `/assets/${osDir}/icons/folder.png`;
+  } else if (iconType === "text") {
+    iconPath = `/assets/${osDir}/icons/text.png`;
+  } else if (iconType === "shortcut") {
+    iconPath = `/assets/${osDir}/icons/shortcut.png`;
+  } else if (iconType === "bitmap") {
+    iconPath = `/assets/${osDir}/icons/bitmap.png`;
   }
 
   // Grid Logic
@@ -155,11 +225,19 @@ export default function DesktopIcon({
       { separator: true, label: "" },
     ];
 
-    if (icon.id === "recycle") {
+    if (iconType === "recycle") {
       items.push({
         label: "Empty Recycle Bin",
         action: () => dispatch({ type: "EMPTY_RECYCLE_BIN" }),
         disabled: !state.recycleBinFilled,
+      });
+      items.push({ separator: true, label: "" });
+    }
+
+    if (iconType !== "computer" && iconType !== "recycle") {
+      items.push({
+        label: "Delete",
+        action: () => dispatch({ type: "REMOVE_ICON", payload: icon.id }),
       });
       items.push({ separator: true, label: "" });
     }
@@ -178,22 +256,14 @@ export default function DesktopIcon({
 
   return (
     <div
-      className={`absolute flex flex-col items-center justify-start p-1 w-[70px] select-none cursor-default group`}
+      className={`absolute flex flex-col items-center justify-start p-1 w-17.5 select-none cursor-default group`}
       style={{ left: posX, top: posY, opacity: isDragging ? 0.7 : 1 }}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onDoubleClick={() => alert(`Opening ${label}...`)}
     >
       <div className={`mb-1 relative ${isSelected ? "opacity-80" : ""}`}>
-        <img
-          src={iconPath}
-          alt={label}
-          className="w-[32px] h-[32px] object-contain pointer-events-none"
-          draggable={false}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+        <CrossfadeImage src={iconPath} alt={label} />
       </div>
       <div
         className={`text-[11px] text-center leading-tight px-1 rounded-sm ${

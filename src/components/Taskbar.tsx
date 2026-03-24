@@ -261,7 +261,7 @@ export default function Taskbar() {
             : {
                 minWidth: "80px",
                 justifyContent: "center",
-                color: "var(--os-text)",
+                color: "white",
               }
         }
       >
