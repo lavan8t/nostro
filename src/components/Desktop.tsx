@@ -5,7 +5,7 @@ import { useAppContext, MenuItem } from "../state/AppContext";
 import Taskbar from "./Taskbar";
 import ThemeCrossfade from "./ThemeCrossfade";
 import WindowFrame, { SnapRect } from "./WindowFrame";
-import Notepad, { getNotepadMenus } from "../apps/Notepad";
+import Notepad, { getNotepadMenus } from "../apps/Notepad/Notepad";
 import ContextMenu from "./ContextMenu";
 import DesktopIcon from "./DesktopIcon";
 
@@ -218,7 +218,7 @@ export default function Desktop() {
         })}
       </div>
 
-      { }
+      {}
       <Taskbar />
     </main>
   );
