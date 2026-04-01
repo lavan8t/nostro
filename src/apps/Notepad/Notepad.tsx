@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { useAppContext } from "../state/AppContext";
-import { MenuItem } from "../state/AppContext";
+import { useAppContext } from "../../state/AppContext";
+import { MenuItem } from "../../state/AppContext";
 
 export const getNotepadMenus = (
   dispatch: any,
