@@ -1,35 +1,10 @@
+// src/components/WindowFrame.tsx
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { useAppContext, WindowState, MenuItem } from "../state/AppContext";
 import { Icons } from "./Icons";
-
-// --------------------------------------------------
-// CONSTANTS & STYLES (Migrated from CSS Module)
-// --------------------------------------------------
-
-// Windows 7 Theme Constants
-const WIN7_STYLES = {
-  glassBackground: `
-    linear-gradient(135deg, #fff5 70px, transparent 100px),
-    linear-gradient(225deg, #fff5 70px, transparent 100px),
-    linear-gradient(
-      54deg,
-      #0002 0 4%, #6661 6% 6%, #0002 8% 10%, #0002 15% 16%, #aaa1 17% 18%,
-      #0002 23% 24%, #bbb2 25% 26%, #0002 31% 33%, #0002 34% 34.5%, #bbb2 36% 40%,
-      #0002 41% 41.5%, #bbb2 44% 45%, #bbb2 46% 47%, #0002 48% 49%, #0002 50% 50.5%,
-      #0002 56% 56.5%, #bbb2 57% 63%, #0002 67% 69%, #bbb2 69.5% 70%, #0002 73.5% 74%,
-      #bbb2 74.5% 79%, #0002 80% 84%, #aaa2 85% 86%, #0002 87%, #bbb1 90%
-    ) center/100vw 100vh no-repeat fixed
-  `,
-  windowBg: "#4580c4",
-  borderColor: "#000000b3",
-};
-
-// --------------------------------------------------
-// TYPES
-// --------------------------------------------------
 
 export interface SnapRect {
   x: number;
@@ -48,25 +23,16 @@ type SnapType =
   | "bottom-right"
   | null;
 
-// --------------------------------------------------
-// HELPER
-// --------------------------------------------------
-
 const getWindowTitle = (id: string) => {
   if (id.includes("notepad")) return "Untitled - Notepad";
   if (id.includes("paint")) return "Untitled - Paint";
   if (id.includes("terminal") || id.includes("cmd")) return "Command Prompt";
   if (id.includes("internet") || id.includes("browser"))
     return "Internet Explorer";
-  if (id.includes("explorer")) return "File Explorer";
+  if (id.includes("explorer")) return "Computer";
   return "Application";
 };
 
-// --------------------------------------------------
-// SUB-COMPONENTS
-// --------------------------------------------------
-
-// Authentic XP Button
 function XPButton({
   type,
   onClick,
@@ -121,7 +87,6 @@ function XPButton({
   );
 }
 
-// Authentic Win98/Classic Button
 function ClassicButton({
   type,
   onClick,
@@ -161,10 +126,6 @@ function ClassicButton({
   );
 }
 
-// --------------------------------------------------
-// MAIN COMPONENT
-// --------------------------------------------------
-
 export default function WindowFrame({
   win,
   onSnapHover,
@@ -197,11 +158,10 @@ export default function WindowFrame({
 
   const windowTitle = getWindowTitle(win.id);
 
-  // Mount animation
   useEffect(() => {
     setAnimState("entering");
-    const raf1 = requestAnimationFrame(() => {
-      const raf2 = requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         setAnimState("visible");
       });
     });
@@ -211,7 +171,6 @@ export default function WindowFrame({
     };
   }, []);
 
-  // Actions
   const activate = () => {
     if (!win.focused) {
       const sorted = [...state.windows].sort((a, b) => a.z - b.z);
@@ -227,6 +186,10 @@ export default function WindowFrame({
 
   const handleMinimize = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isClassic) {
+      dispatch({ type: "MINIMIZE_WINDOW", payload: win.id });
+      return;
+    }
     setAnimState("exiting");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "MINIMIZE_WINDOW", payload: win.id });
@@ -242,13 +205,16 @@ export default function WindowFrame({
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isClassic) {
+      dispatch({ type: "REMOVE_WINDOW", payload: win.id });
+      return;
+    }
     setAnimState("closing");
     animationTimeoutRef.current = setTimeout(() => {
       dispatch({ type: "REMOVE_WINDOW", payload: win.id });
     }, 300);
   };
 
-  // Drag Logic
   const handleDrag = (e: any, d: any) => {
     if (win.maximized && d.y > 20) {
       const newX = Math.max(
@@ -262,9 +228,9 @@ export default function WindowFrame({
       });
       return;
     }
-    const mouseX = e.clientX,
-      mouseY = e.clientY,
-      workHeight = vh - 40;
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const workHeight = vh - 40;
     let newSnap: SnapType = null;
     let preview: SnapRect | null = null;
 
@@ -317,16 +283,36 @@ export default function WindowFrame({
     onSnapHover(null);
   };
 
-  // Styles Hook
+  const handleResizeStop = (
+    e: any,
+    direction: any,
+    ref: HTMLElement,
+    delta: any,
+    position: any,
+  ) => {
+    setIsInteracting(false);
+    dispatch({
+      type: "UPDATE_WINDOW",
+      payload: {
+        id: win.id,
+        width: ref.offsetWidth,
+        height: ref.offsetHeight,
+        x: position.x,
+        y: position.y,
+      },
+    });
+  };
+
   const dropDistance = vh - win.y;
+
   const getStyles = () => {
-    if (isXP || isClassic) {
+    if (isClassic) return { opacity: 1, transition: "none", transform: "none" };
+    if (isXP)
       return {
         opacity: animState === "visible" ? 1 : 0,
         transition: "opacity 150ms ease-in-out",
         transform: "none",
       };
-    }
     const base =
       "transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-in-out";
     if (animState === "entering")
@@ -355,24 +341,22 @@ export default function WindowFrame({
     };
   };
 
-  const rndTransition = isInteracting
-    ? "none"
-    : "transform 200ms ease-in-out, width 200ms ease-in-out, height 200ms ease-in-out";
+  const rndTransition =
+    isInteracting || isClassic
+      ? "none"
+      : "transform 200ms ease-in-out, width 200ms ease-in-out, height 200ms ease-in-out";
   const position = win.maximized ? { x: 0, y: 0 } : { x: win.x, y: win.y };
   const size = win.maximized
     ? { width: vw, height: Math.max(0, vh - 40) }
     : { width: win.width, height: win.height };
 
-  // --------------------------------------------------
-  // WINDOWS 7 RENDERER (Original Style Logic Migrated)
-  // --------------------------------------------------
   if (isWin7) {
     return (
       <Rnd
         size={size}
         position={position}
         style={{ zIndex: win.z, transition: rndTransition }}
-        dragHandleClassName="window-header"
+        dragHandleClassName="title-bar"
         disableDragging={win.maximized}
         enableResizing={!win.maximized}
         onDragStart={() => {
@@ -385,131 +369,66 @@ export default function WindowFrame({
         }}
         onDrag={handleDrag}
         onDragStop={handleDragStop}
+        onResizeStop={handleResizeStop}
         onMouseDown={activate}
       >
-        <div style={{ width: "100%", height: "100%" }}>
+        <div
+          className="win7"
+          style={{
+            width: "100%",
+            height: "100%",
+            ...getStyles(),
+            boxSizing: "border-box",
+          }}
+        >
           <div
-            className={`window ${win.focused ? "active" : ""}`}
+            className={`window glass ${win.focused ? "active" : ""}`}
             style={{
               width: "100%",
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              borderRadius: "6px",
-              boxShadow: `2px 2px 10px 1px ${WIN7_STYLES.borderColor}, inset 0 0 0 1px #fffa`,
-              border: `1px solid ${WIN7_STYLES.borderColor}`,
-              backgroundColor: "transparent",
-              position: "relative",
-              ...getStyles(),
+              boxSizing: "border-box",
+              margin: 0,
             }}
           >
-            {/* Glass Overlay Background */}
+            <div className="title-bar" onDoubleClick={handleMaximizeToggle}>
+              <div className="title-bar-text">{windowTitle}</div>
+              <div className="title-bar-controls">
+                <button
+                  aria-label="Minimize"
+                  onClick={handleMinimize}
+                  onMouseDown={(e) => e.stopPropagation()}
+                ></button>
+                <button
+                  aria-label={win.maximized ? "Restore" : "Maximize"}
+                  onClick={handleMaximizeToggle}
+                  onMouseDown={(e) => e.stopPropagation()}
+                ></button>
+                <button
+                  aria-label="Close"
+                  onClick={handleClose}
+                  onMouseDown={(e) => e.stopPropagation()}
+                ></button>
+              </div>
+            </div>
             <div
+              className="window-body"
               style={{
-                position: "absolute",
-                zIndex: -1,
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                borderRadius: "6px",
-                background: `linear-gradient(transparent 20%, #ffffffb3 40%, transparent 41%), linear-gradient(to right, #ffffff66, #0000001a, #ffffff33), ${WIN7_STYLES.windowBg}`,
-                backgroundColor: WIN7_STYLES.windowBg,
-                boxShadow: "inset 0 0 0 1px #fffd",
-                opacity: 0.95,
-              }}
-            />
-
-            {/* Title Bar */}
-            <div
-              className="window-header"
-              onDoubleClick={handleMaximizeToggle}
-              style={{
-                borderRadius: "6px 6px 0 0",
-                background: "transparent",
-                boxShadow:
-                  "inset 0 1px 0 #fffd, inset 1px 0 0 #fffd, inset -1px 0 0 #fffd",
+                flex: 1,
+                overflow: "hidden",
                 display: "flex",
-                alignItems: "center",
-                padding: "3px 2px",
-                minHeight: "18px",
-                color: "#000",
-                textShadow: "0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff",
-                fontWeight: "bold",
-                userSelect: "none",
+                flexDirection: "column",
+                backgroundColor: "#fff",
               }}
             >
               <div
                 style={{
                   flex: 1,
-                  whiteSpace: "nowrap",
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  padding: "0 4px",
-                }}
-              >
-                {windowTitle}
-              </div>
-              {/* Controls */}
-              <div
-                style={{
                   display: "flex",
-                  background: "#fff3",
-                  border: "1px solid #0000004d",
-                  borderTop: "0",
-                  borderRadius: "0 0 5px 5px",
-                  boxShadow: "0 1px 0 #fffa, 1px 0 0 #fffa, -1px 0 0 #fffa",
-                  marginRight: "4px",
+                  flexDirection: "column",
                 }}
-              >
-                <button
-                  onClick={handleMinimize}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="w-7 h-[18h-4.5er-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
-                >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute left-2.25 bottom-1 w-2.5 h-0.5 bg-black" />
-                  </div>
-                </button>
-                <button
-                  onClick={handleMaximizeToggle}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="w-7 h-4.5 border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
-                >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-1 left-2.25 w-2.5 h-2 border border-black" />
-                  </div>
-                </button>
-                <button
-                  onClick={handleClose}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  className="w-10 h-4.5 rounded-[0_0_5px_0] hover:bg-[#d54f36] relative group"
-                >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-1 left-3.5 w-3 h-2.5 text-black group-hover:text-white font-sans font-bold leading-2.5">
-                      x
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div
-              style={{
-                flex: 1,
-                margin: "6px",
-                marginTop: "0",
-                border: `1px solid ${WIN7_STYLES.borderColor}`,
-                background: "#f0f0f0",
-                boxShadow: "0 0 0 1px #fff9",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{ flex: 1, backgroundColor: "#fff", overflow: "auto" }}
               >
                 {children}
               </div>
@@ -520,9 +439,6 @@ export default function WindowFrame({
     );
   }
 
-  // --------------------------------------------------
-  // WINDOWS XP RENDERER (Authentic, Inline)
-  // --------------------------------------------------
   if (isXP) {
     const xpTitleBg = win.focused
       ? "linear-gradient(to bottom, #0058ee 0%, #3593ff 4%, #288eff 6%, #127dff 8%, #036ffc 10%, #0262ee 14%, #0057e5 20%, #0054e3 24%, #0055eb 56%, #005bf5 66%, #026afe 76%, #0062ef 86%, #0052d6 92%, #0040ab 94%, #003092 100%)"
@@ -546,6 +462,7 @@ export default function WindowFrame({
         }}
         onDrag={handleDrag}
         onDragStop={handleDragStop}
+        onResizeStop={handleResizeStop}
         onMouseDown={activate}
       >
         <div
@@ -610,7 +527,6 @@ export default function WindowFrame({
               <XPButton type="close" onClick={handleClose} />
             </div>
           </div>
-          {/* XP Menu Bar Placeholder */}
           {menuItems && (
             <div
               className="flex items-center px-1 border-b border-[#d4d0c8]"
@@ -645,9 +561,6 @@ export default function WindowFrame({
     );
   }
 
-  // --------------------------------------------------
-  // DEFAULT / WINDOWS 98 RENDERER (Classic Tailwind)
-  // --------------------------------------------------
   return (
     <Rnd
       size={size}
@@ -666,22 +579,15 @@ export default function WindowFrame({
       }}
       onDrag={handleDrag}
       onDragStop={handleDragStop}
+      onResizeStop={handleResizeStop}
       onMouseDown={activate}
     >
       <div
-        className={`w-full h-full flex flex-col box-border p-0.75 bg-(--ButtonFace) text-(--ButtonText) font-(--os-font) text-[12px]
-          border-t border-l border-r border-b border-(--ButtonDkShadow) shadow-[inset_1px_1px_0_0_var(--ButtonLight),inset_-1px_-1px_0_0_var(--ButtonShadow)]
-          transition-colors duration-500
-          ${win.maximized ? "border-0! p-0! shadow-none!" : ""}`}
+        className={`w-full h-full flex flex-col box-border p-0.75 bg-(--ButtonFace) text-(--ButtonText) font-(--os-font) text-[13px] border-t border-l border-r border-b border-(--ButtonDkShadow) shadow-[inset_1px_1px_0_0_var(--ButtonLight),inset_-1px_-1px_0_0_var(--ButtonShadow)] transition-colors duration-500 ${win.maximized ? "border-0! p-0! shadow-none!" : ""}`}
         style={getStyles()}
       >
-        {/* Title Bar */}
         <div
-          className={`window-header flex items-center px-0.5 min-h-4.5 font-bold tracking-wide select-none
-            ${win.focused
-              ? "bg-linear-to-r from-(--ActiveTitle) to-(--GradientActiveTitle) text-(--ActiveTitleText)"
-              : "bg-linear-to-r from-(--InactiveTitle) to-(--GradientInactiveTitle) text-(--InactiveTitleText)"
-            }`}
+          className={`window-header flex items-center px-0.5 min-h-4.5 font-bold tracking-wide select-none ${win.focused ? "bg-linear-to-r from-(--ActiveTitle) to-(--GradientActiveTitle) text-(--ActiveTitleText)" : "bg-linear-to-r from-(--InactiveTitle) to-(--GradientInactiveTitle) text-(--InactiveTitleText)"}`}
           onDoubleClick={handleMaximizeToggle}
         >
           <div className="w-4 h-4 mr-0.75 flex items-center justify-center">
@@ -698,9 +604,7 @@ export default function WindowFrame({
             <ClassicButton type="close" onClick={handleClose} />
           </div>
         </div>
-
-        {/* Menu Bar */}
-        <div className="flex bg-(--Menu) p-[1px_0] mt-px min-h-4.5">
+        <div className="flex bg-(--Menu) py-px mt-px min-h-4.5">
           {(menuItems || ["File", "Edit", "View", "Help"]).map((item) => (
             <div
               key={typeof item === "string" ? item : item.label}
@@ -713,8 +617,6 @@ export default function WindowFrame({
             </div>
           ))}
         </div>
-
-        {/* Content */}
         <div className="flex-1 min-h-0 bg-white relative overflow-auto mt-0.5 border-t border-l border-(--ButtonShadow) border-r border-b shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
           {children}
         </div>

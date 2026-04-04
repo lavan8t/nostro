@@ -85,7 +85,7 @@ function MenuItem({ label, icon, onClick, hasSubmenu }: any) {
     <button
       onClick={onClick}
       className="flex items-center gap-2 px-3 py-1 hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] w-full text-left group"
-      style={{ color: "var(--MenuText)" }}
+      style={{ color: "var(--MenuText)", fontSize: "13px" }}
     >
       <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
       <span className="flex-1">{label}</span>
@@ -98,7 +98,13 @@ function MenuItem({ label, icon, onClick, hasSubmenu }: any) {
 // LAYOUTS
 // --------------------------------------------------
 
-export const Win7StartMenu = ({ handleLaunch, handleLogout }: { handleLaunch: LaunchFn; handleLogout: () => void }) => {
+export const Win7StartMenu = ({
+  handleLaunch,
+  handleLogout,
+}: {
+  handleLaunch: LaunchFn;
+  handleLogout: () => void;
+}) => {
   return (
     <>
       <style
@@ -189,7 +195,10 @@ export const Win7StartMenu = ({ handleLaunch, handleLogout }: { handleLaunch: La
             <Win7LinkRow label="Help and Support" />
           </div>
           <div className="mt-auto mb-2 px-3">
-            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1.5 rounded-sm w-fit ml-auto transition-all text-black win7-shutdown-btn">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-sm w-fit ml-auto transition-all text-black win7-shutdown-btn"
+            >
               <span className="text-xs font-semibold">Shut down</span>
               <div className="pl-1 border-l border-black/20 text-black/70">
                 <Icons.ArrowRight />
@@ -251,7 +260,8 @@ export const Win10StartMenu = ({
             </button>
             <button
               onClick={handleLogout}
-              className="w-[48px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
+              className="w-[48px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors"
+            >
               <Icons.Power />
             </button>
           </div>
@@ -345,13 +355,13 @@ export const Win10StartMenu = ({
                   size="medium"
                   color="#333333"
                   label="PowerToys"
-                  icon={<div className="text-xl">🛠</div>}
+                  icon={<div className="text-xl">🛠️</div>}
                 />
                 <Win10Tile
                   size="medium"
                   color="#555555"
                   label="GIMP"
-                  icon={<div className="text-xl">🎨</div>}
+                  icon={<div className="text-xl">🖌️</div>}
                 />
               </div>
             </div>
@@ -492,7 +502,10 @@ export const WinXPStartMenu = ({
           </div>
           <span className="text-sm">Log Off</span>
         </button>
-        <button onClick={handleLogout} className="flex items-center gap-1 text-white hover:brightness-110 ml-2">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1 text-white hover:brightness-110 ml-2"
+        >
           <div className="bg-[#d64a28] p-[2px] rounded-sm border border-white/50 shadow-sm">
             <Icons.Power />
           </div>
@@ -513,58 +526,79 @@ export const WinClassicStartMenu = ({
   osIndex: number;
 }) => {
   return (
-    <div
-      className="absolute bottom-[28px] left-0 min-w-[200px] border shadow-xl z-[99999]"
-      style={{
-        backgroundColor: "var(--Menu)",
-        borderTop: "1px solid var(--ButtonHilight)",
-        borderLeft: "1px solid var(--ButtonHilight)",
-        borderRight: "1px solid var(--ButtonDkShadow)",
-        borderBottom: "1px solid var(--ButtonDkShadow)",
-        padding: "2px",
-        fontFamily: "var(--os-font)",
-      }}
-    >
-      <div className="flex">
-        {osIndex === 0 && (
-          <div
-            className="w-6 bg-[#000080] text-white flex items-end justify-center pb-2 mr-1"
-            style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}
-          >
-            <span className="font-bold text-lg tracking-widest">Windows</span>
-            <span className="font-normal text-lg tracking-widest ml-1">98</span>
+    <>
+      <style>
+        {`
+          @keyframes win98SlideRight {
+            0% { opacity: 0; transform: translateX(-8px); }
+            100% { opacity: 1; transform: translateX(0); }
+          }
+        `}
+      </style>
+      <div
+        className="absolute bottom-[28px] left-0 min-w-[200px] border shadow-xl z-[99999]"
+        style={{
+          backgroundColor: "var(--Menu)",
+          borderTop: "1px solid var(--ButtonHilight)",
+          borderLeft: "1px solid var(--ButtonHilight)",
+          borderRight: "1px solid var(--ButtonDkShadow)",
+          borderBottom: "1px solid var(--ButtonDkShadow)",
+          padding: "2px",
+          fontFamily: "var(--os-font)",
+          animation: "win98SlideRight 0.08s ease-out forwards",
+          transformOrigin: "bottom left",
+        }}
+      >
+        <div className="flex">
+          {osIndex === 0 && (
+            <div
+              className="w-6 bg-[#000080] text-white flex items-end justify-center pb-2 mr-1"
+              style={{
+                writingMode: "vertical-lr",
+                transform: "rotate(180deg)",
+              }}
+            >
+              <span className="font-bold text-lg tracking-widest">Windows</span>
+              <span className="font-normal text-lg tracking-widest ml-1">
+                98
+              </span>
+            </div>
+          )}
+          <div className="flex-1 flex flex-col">
+            <MenuItem
+              label="Programs"
+              icon={<Icons.App color="gold" />}
+              hasSubmenu
+            />
+            <MenuItem
+              label="Documents"
+              icon={<Icons.App color="gold" />}
+              hasSubmenu
+            />
+            <MenuItem label="Settings" icon={<Icons.Settings />} hasSubmenu />
+            <MenuItem label="Find" icon={<Icons.App color="blue" />} />
+            <MenuItem label="Help" icon={<Icons.Settings />} />
+            <MenuItem label="Run..." icon={<Icons.App color="blue" />} />
+            <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
+            <MenuItem
+              label="Notepad"
+              icon={<Icons.App />}
+              onClick={() => handleLaunch("wnd-notepad")}
+            />
+            <MenuItem
+              label="Paint"
+              icon={<Icons.App color="orange" />}
+              onClick={() => handleLaunch("wnd-paint")}
+            />
+            <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
+            <MenuItem
+              label="Shut Down..."
+              icon={<Icons.Power />}
+              onClick={handleLogout}
+            />
           </div>
-        )}
-        <div className="flex-1 flex flex-col">
-          <MenuItem
-            label="Programs"
-            icon={<Icons.App color="gold" />}
-            hasSubmenu
-          />
-          <MenuItem
-            label="Documents"
-            icon={<Icons.App color="gold" />}
-            hasSubmenu
-          />
-          <MenuItem label="Settings" icon={<Icons.Settings />} hasSubmenu />
-          <MenuItem label="Find" icon={<Icons.App color="blue" />} />
-          <MenuItem label="Help" icon={<Icons.Settings />} />
-          <MenuItem label="Run..." icon={<Icons.App color="blue" />} />
-          <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-          <MenuItem
-            label="Notepad"
-            icon={<Icons.App />}
-            onClick={() => handleLaunch("wnd-notepad")}
-          />
-          <MenuItem
-            label="Paint"
-            icon={<Icons.App color="orange" />}
-            onClick={() => handleLaunch("wnd-paint")}
-          />
-          <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-          <MenuItem label="Shut Down..." icon={<Icons.Power />} onClick={handleLogout} />
         </div>
       </div>
-    </div>
+    </>
   );
 };

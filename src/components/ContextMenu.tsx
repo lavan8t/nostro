@@ -38,15 +38,14 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center px-4 py-px cursor-default select-none"
+      className="flex items-center px-4 py-0.5 cursor-default select-none relative"
       style={{
         backgroundColor: isActive ? "var(--Hilight)" : "transparent",
         color: isActive ? "var(--HilightText)" : "var(--MenuText)",
         fontFamily: "var(--os-font)",
-        fontSize: "11px",
+        fontSize: "13px", // Increased Font Size
       }}
     >
-      {/* Label */}
       <span
         className="flex-1"
         style={
@@ -61,7 +60,6 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         {item.label}
       </span>
 
-      {/* Shortcut */}
       {item.shortcut && (
         <span
           className="ml-4"
@@ -78,7 +76,6 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         </span>
       )}
 
-      {/* Arrow */}
       {item.submenu && (
         <div className="ml-2">
           <svg
@@ -98,7 +95,6 @@ const Win98Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         </div>
       )}
 
-      {/* Nested Menu */}
       {item.submenu && isHovered && (
         <div className="absolute left-full -top-0.75 -ml-0.75">
           <SubMenu items={item.submenu} osIndex={0} />
@@ -118,7 +114,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
   if (item.separator) {
     return (
       <div className="flex my-px">
-        <div className="w-7 shrink-0 bg-[#ECE9D8]" /> {/* Gutter skip */}
+        <div className="w-7 shrink-0 bg-[#ECE9D8]" />
         <div className="flex-1 h-px bg-[#aca899] mr-1" />
       </div>
     );
@@ -140,10 +136,7 @@ const WinXPItem = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         border: isActive ? "1px solid #316AC5" : "1px solid transparent",
       }}
     >
-      {/* Gutter Icon Area (Transparent over global gutter) */}
-      <div className="w-6.5 shrink-0 flex items-center justify-center">
-        {/* Icon would go here */}
-      </div>
+      <div className="w-6.5 shrink-0 flex items-center justify-center"></div>
 
       <span
         className="flex-1 px-1"
@@ -218,10 +211,7 @@ const Win7Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         fontSize: "12px",
       }}
     >
-      {/* Icon Area */}
-      <div className="w-7 shrink-0 flex items-center justify-center">
-        {/* Icon */}
-      </div>
+      <div className="w-7 shrink-0 flex items-center justify-center"></div>
 
       <span className="flex-1">{item.label}</span>
       {item.shortcut && (
@@ -271,7 +261,7 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
         fontSize: "13px",
       }}
     >
-      <div className="w-8 shrink-0" /> {/* Icon Placeholder */}
+      <div className="w-8 shrink-0" />
       <span className="flex-1">{item.label}</span>
       {item.shortcut && (
         <span className="ml-4 opacity-60 text-xs">{item.shortcut}</span>
@@ -305,7 +295,6 @@ const SubMenu = ({
 }) => {
   const { dispatch } = useAppContext();
 
-  // WIN 98
   if (osIndex === 0) {
     return (
       <div
@@ -318,8 +307,18 @@ const SubMenu = ({
           borderBottom: "1px solid var(--ButtonDkShadow)",
           boxShadow:
             "inset -1px -1px 0 var(--ButtonShadow), inset 1px 1px 0 var(--ButtonLight)",
+          animation: "win98SlideRight 0.08s ease-out forwards",
+          transformOrigin: "top left",
         }}
       >
+        <style>
+          {`
+            @keyframes win98SlideRight {
+              0% { opacity: 0; transform: translateX(-8px); }
+              100% { opacity: 1; transform: translateX(0); }
+            }
+          `}
+        </style>
         {items.map((item, idx) => (
           <Win98Item key={idx} item={item} dispatch={dispatch} />
         ))}
@@ -327,7 +326,6 @@ const SubMenu = ({
     );
   }
 
-  // WIN XP
   if (osIndex === 1) {
     return (
       <div
@@ -337,7 +335,6 @@ const SubMenu = ({
           boxShadow: "4px 4px 3px rgba(0,0,0,0.2)",
         }}
       >
-        {/* XP Gutter */}
         <div className="absolute left-0.5 top-0.5 bottom-0.5 w-6.5 bg-[#ECE9D8] z-0 pointer-events-none" />
         <div className="relative z-10">
           {items.map((item, idx) => (
@@ -348,7 +345,6 @@ const SubMenu = ({
     );
   }
 
-  // WIN 7
   if (osIndex === 2) {
     return (
       <div
@@ -358,7 +354,6 @@ const SubMenu = ({
           boxShadow: "4px 4px 5px rgba(0,0,0,0.2)",
         }}
       >
-        {/* Win7 Gutter */}
         <div className="absolute left-0 top-0 bottom-0 w-8.5 border-r border-[#e2e3e3] bg-[#f0f0f0] z-0 pointer-events-none" />
         <div className="relative z-10">
           {items.map((item, idx) => (
@@ -369,12 +364,11 @@ const SubMenu = ({
     );
   }
 
-  // WIN 10/11
   return (
     <div
       className="min-w-50 py-1 z-99999 flex flex-col"
       style={{
-        backgroundColor: "#2b2b2b", // Dark Acrylic-ish
+        backgroundColor: "#2b2b2b",
         border: "1px solid #1f1f1f",
         boxShadow: "0 8px 16px rgba(0,0,0,0.35)",
         backdropFilter: "blur(20px)",

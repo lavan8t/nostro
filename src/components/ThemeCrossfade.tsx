@@ -7,18 +7,13 @@ import { osThemes, ThemeTokens } from "../themes/osThemes";
 export default function ThemeCrossfade() {
   const { state } = useAppContext();
 
-
   const [currentLayerIndex, setCurrentLayerIndex] = useState(state.osIndex);
   const [nextLayerIndex, setNextLayerIndex] = useState<number | null>(null);
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-
     if (state.osIndex !== currentLayerIndex) {
-
-
       setNextLayerIndex(state.osIndex);
-
 
       const raf = requestAnimationFrame(() => {
         const raf2 = requestAnimationFrame(() => {
@@ -27,7 +22,6 @@ export default function ThemeCrossfade() {
       });
 
       const timeout = setTimeout(() => {
-
         setCurrentLayerIndex(state.osIndex);
         setNextLayerIndex(null);
         setOpacity(0);
@@ -35,7 +29,6 @@ export default function ThemeCrossfade() {
 
       return () => {
         clearTimeout(timeout);
-
       };
     }
   }, [state.osIndex, currentLayerIndex]);
