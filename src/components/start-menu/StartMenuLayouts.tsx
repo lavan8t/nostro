@@ -62,7 +62,7 @@ function Win10AppRow({
   );
 }
 
-function Win10Tile({ size, color, label, icon, textColor = "white" }: any) {
+function Win10Tile({ size, color, label, icon, textColor = "white", onClick }: any) {
   const sizeClasses: any = {
     small: "col-span-1 row-span-1 h-[50px]",
     medium: "col-span-2 row-span-2 h-[100px]",
@@ -73,6 +73,7 @@ function Win10Tile({ size, color, label, icon, textColor = "white" }: any) {
     <div
       className={`${sizeClasses[size]} p-2 flex flex-col justify-between hover:brightness-110 active:scale-95 transition-all cursor-default`}
       style={{ backgroundColor: color, color: textColor }}
+      onClick={onClick}
     >
       <div className="flex-1 flex items-center justify-center">{icon}</div>
       <span className="text-xs font-medium truncate">{label}</span>
@@ -141,6 +142,11 @@ export const Win7StartMenu = ({ handleLaunch, handleLogout }: { handleLaunch: La
               name="Notepad"
               color="#444"
               onClick={() => handleLaunch("wnd-notepad")}
+            />
+            <Win7AppRow
+              name="Terminal"
+              color="#000000"
+              onClick={() => handleLaunch("wnd-terminal")}
             />
           </div>
           <div className="p-3 pb-3">
@@ -339,6 +345,7 @@ export const Win10StartMenu = ({
                   size="medium"
                   color="#000000"
                   label="Terminal"
+                  onClick={() => handleLaunch("wnd-terminal")}
                   icon={<div className="text-xl">_</div>}
                 />
                 <Win10Tile
@@ -433,6 +440,15 @@ export const WinXPStartMenu = ({
               <Icons.App color="#2f71cd" />
               <span className="text-sm text-gray-800 hover:text-white">
                 Notepad
+              </span>
+            </button>
+            <button
+              onClick={() => handleLaunch("wnd-terminal")}
+              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+            >
+              <Icons.App color="#333" />
+              <span className="text-sm text-gray-800 hover:text-white">
+                Command Prompt
               </span>
             </button>
             <button
@@ -560,6 +576,11 @@ export const WinClassicStartMenu = ({
             label="Paint"
             icon={<Icons.App color="orange" />}
             onClick={() => handleLaunch("wnd-paint")}
+          />
+          <MenuItem
+            label="MS-DOS Prompt"
+            icon={<Icons.App color="#000080" />}
+            onClick={() => handleLaunch("wnd-terminal")}
           />
           <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
           <MenuItem label="Shut Down..." icon={<Icons.Power />} onClick={handleLogout} />

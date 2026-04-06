@@ -6,8 +6,10 @@ import Taskbar from "./Taskbar";
 import ThemeCrossfade from "./ThemeCrossfade";
 import WindowFrame, { SnapRect } from "./WindowFrame";
 import Notepad, { getNotepadMenus } from "../apps/Notepad/Notepad";
+import TerminalApp from "../apps/Terminal/TerminalApp";
 import ContextMenu from "./ContextMenu";
 import DesktopIcon from "./DesktopIcon";
+import BSODOverlay from "./BSODOverlay";
 
 // --------------------------------------------------
 // HOOKS
@@ -58,6 +60,9 @@ export default function Desktop() {
         content: <Notepad winId={id} />,
         menus: getNotepadMenus(dispatch, id, state.notepad.text),
       };
+    }
+    if (id.includes("terminal") || id.includes("cmd") || id.includes("powershell")) {
+      return { content: <TerminalApp winId={id} /> };
     }
     return { content: null };
   };
@@ -220,6 +225,7 @@ export default function Desktop() {
 
       {}
       <Taskbar />
+      <BSODOverlay />
     </main>
   );
 }

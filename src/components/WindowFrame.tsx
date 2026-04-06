@@ -52,10 +52,15 @@ type SnapType =
 // HELPER
 // --------------------------------------------------
 
-const getWindowTitle = (id: string) => {
+const getWindowTitle = (id: string, osIndex?: number) => {
   if (id.includes("notepad")) return "Untitled - Notepad";
   if (id.includes("paint")) return "Untitled - Paint";
-  if (id.includes("terminal") || id.includes("cmd")) return "Command Prompt";
+  if (id.includes("terminal") || id.includes("cmd") || id.includes("powershell")) {
+    if (osIndex === 0) return "MS-DOS Prompt";
+    if (osIndex === 1) return "C:\\WINDOWS\\system32\\cmd.exe";
+    if (osIndex === 2) return "C:\\Windows\\system32\\cmd.exe";
+    return "Windows PowerShell";
+  }
   if (id.includes("internet") || id.includes("browser"))
     return "Internet Explorer";
   if (id.includes("explorer")) return "File Explorer";
@@ -195,7 +200,7 @@ export default function WindowFrame({
   const isXP = state.osIndex === 1;
   const isClassic = state.osIndex === 0;
 
-  const windowTitle = getWindowTitle(win.id);
+  const windowTitle = win.title ?? getWindowTitle(win.id, state.osIndex);
 
   // Mount animation
   useEffect(() => {
@@ -433,9 +438,11 @@ export default function WindowFrame({
                 alignItems: "center",
                 padding: "3px 2px",
                 minHeight: "18px",
-                color: "#000",
-                textShadow: "0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff",
-                fontWeight: "bold",
+                color: "#1a1a1a",
+                fontFamily: "'Segoe UI', Tahoma, sans-serif",
+                fontSize: "12px",
+                fontWeight: "600",
+                textShadow: "0 1px 0 rgba(255,255,255,0.6)",
                 userSelect: "none",
               }}
             >
@@ -450,46 +457,85 @@ export default function WindowFrame({
               >
                 {windowTitle}
               </div>
-              {/* Controls */}
+              {/* Controls — authentic Win7 Aero */}
               <div
                 style={{
                   display: "flex",
-                  background: "#fff3",
-                  border: "1px solid #0000004d",
-                  borderTop: "0",
-                  borderRadius: "0 0 5px 5px",
-                  boxShadow: "0 1px 0 #fffa, 1px 0 0 #fffa, -1px 0 0 #fffa",
-                  marginRight: "4px",
+                  alignItems: "center",
+                  gap: 2,
+                  marginRight: 4,
                 }}
               >
+                {/* Minimize */}
                 <button
                   onClick={handleMinimize}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-7 h-[18h-4.5er-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                  style={{
+                    width: 26,
+                    height: 19,
+                    borderRadius: 4,
+                    background: "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(210,225,245,0.85) 45%, rgba(185,210,240,0.75) 50%, rgba(215,230,248,0.9) 100%)",
+                    border: "1px solid rgba(90,130,170,0.55)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "default",
+                    flexShrink: 0,
+                    padding: 0,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(190,215,250,0.95) 45%, rgba(160,200,240,0.9) 50%, rgba(195,220,250,0.95) 100%)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(210,225,245,0.85) 45%, rgba(185,210,240,0.75) 50%, rgba(215,230,248,0.9) 100%)"; }}
                 >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute left-2.25 bottom-1 w-2.5 h-0.5 bg-black" />
-                  </div>
+                  <div style={{ width: 8, height: 2, backgroundColor: "#fff", borderRadius: 1, boxShadow: "0 1px 2px rgba(0,0,0,0.5)" }} />
                 </button>
+
+                {/* Maximize / Restore */}
                 <button
                   onClick={handleMaximizeToggle}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-7 h-4.5 border-r border-[#0000004d] hover:bg-[#ffffff4d] relative"
+                  style={{
+                    width: 26,
+                    height: 19,
+                    borderRadius: 4,
+                    background: "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(210,225,245,0.85) 45%, rgba(185,210,240,0.75) 50%, rgba(215,230,248,0.9) 100%)",
+                    border: "1px solid rgba(90,130,170,0.55)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "default",
+                    flexShrink: 0,
+                    padding: 0,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(190,215,250,0.95) 45%, rgba(160,200,240,0.9) 50%, rgba(195,220,250,0.95) 100%)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(210,225,245,0.85) 45%, rgba(185,210,240,0.75) 50%, rgba(215,230,248,0.9) 100%)"; }}
                 >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-1 left-2.25 w-2.5 h-2 border border-black" />
-                  </div>
+                  <div style={{ width: 9, height: 7, border: "1.5px solid #fff", borderTop: "2.5px solid #fff", boxSizing: "border-box", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.5))" }} />
                 </button>
+
+                {/* Close — always red in Win7 Aero */}
                 <button
                   onClick={handleClose}
                   onMouseDown={(e) => e.stopPropagation()}
-                  className="w-10 h-4.5 rounded-[0_0_5px_0] hover:bg-[#d54f36] relative group"
+                  style={{
+                    width: 26,
+                    height: 19,
+                    borderRadius: 4,
+                    background: "linear-gradient(to bottom, #f0807a 0%, #d94f4a 45%, #c03030 50%, #d45050 100%)",
+                    border: "1px solid #9a2020",
+                    boxShadow: "inset 0 1px 0 rgba(255,180,180,0.7), 0 1px 2px rgba(0,0,0,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "default",
+                    flexShrink: 0,
+                    padding: 0,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, #f89a94 0%, #e96560 45%, #d04040 50%, #e06060 100%)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "linear-gradient(to bottom, #f0807a 0%, #d94f4a 45%, #c03030 50%, #d45050 100%)"; }}
                 >
-                  <div className="absolute inset-0 shadow-[inset_0_0_0_1px_#fff5]">
-                    <div className="absolute top-1 left-3.5 w-3 h-2.5 text-black group-hover:text-white font-sans font-bold leading-2.5">
-                      x
-                    </div>
-                  </div>
+                  <span style={{ color: "#fff", fontSize: 10, fontWeight: "bold", fontFamily: "Arial", lineHeight: 1, textShadow: "0 1px 1px rgba(0,0,0,0.4)" }}>✕</span>
                 </button>
               </div>
             </div>
@@ -509,7 +555,7 @@ export default function WindowFrame({
               }}
             >
               <div
-                style={{ flex: 1, backgroundColor: "#fff", overflow: "auto" }}
+                style={{ flex: 1, backgroundColor: "#fff", overflow: "hidden" }}
               >
                 {children}
               </div>
@@ -634,7 +680,7 @@ export default function WindowFrame({
               margin: "0",
               border: "1px solid #003092",
               borderTop: "none",
-              overflow: "auto",
+              overflow: "hidden",
               position: "relative",
             }}
           >
@@ -715,7 +761,7 @@ export default function WindowFrame({
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 bg-white relative overflow-auto mt-0.5 border-t border-l border-(--ButtonShadow) border-r border-b shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
+        <div className="flex-1 min-h-0 bg-white relative overflow-hidden mt-0.5 border-t border-l border-(--ButtonShadow) border-r border-b shadow-[inset_1px_1px_0_0_var(--ButtonDkShadow),inset_-1px_-1px_0_0_var(--ButtonLight)]">
           {children}
         </div>
       </div>

@@ -57,7 +57,9 @@ export default function Notepad({ winId }: { winId: string }) {
         lineHeight: "1.5",
         border: "none",
         whiteSpace: "pre-wrap",
-        overflowY: "scroll",
+        overflowY: "auto",
+        color: "#000000",
+        backgroundColor: "#ffffff",
       }}
       spellCheck={false}
     />

@@ -140,6 +140,10 @@ export default function DesktopIcon({
     else label = "This PC";
   } else if (iconType === "recycle") {
     label = "Recycle Bin";
+  } else if (iconType === "terminal") {
+    if (osIndex === 0) label = "MS-DOS Prompt";
+    else if (osIndex === 3) label = "Windows PowerShell";
+    else label = "Command Prompt";
   }
 
   // Determine Icon Path
@@ -159,6 +163,8 @@ export default function DesktopIcon({
     iconPath = `/assets/${osDir}/icons/shortcut.png`;
   } else if (iconType === "bitmap") {
     iconPath = `/assets/${osDir}/icons/bitmap.png`;
+  } else if (iconType === "terminal") {
+    iconPath = `/assets/${osDir}/icons/terminal.png`;
   }
 
   // Grid Logic
@@ -260,7 +266,21 @@ export default function DesktopIcon({
       style={{ left: posX, top: posY, opacity: isDragging ? 0.7 : 1 }}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
-      onDoubleClick={() => alert(`Opening ${label}...`)}
+      onDoubleClick={() => {
+        if (iconType === "terminal") {
+          const maxZ = state.windows.reduce((max, w) => Math.max(max, w.z), 0);
+          dispatch({
+            type: "ADD_WINDOW",
+            payload: {
+              id: `wnd-terminal-${Date.now()}`,
+              x: 150, y: 100, width: 720, height: 480,
+              z: maxZ + 1, minimized: false, maximized: false, focused: true,
+            },
+          });
+        } else {
+          alert(`Opening ${label}...`);
+        }
+      }}
     >
       <div className={`mb-1 relative ${isSelected ? "opacity-80" : ""}`}>
         <CrossfadeImage src={iconPath} alt={label} />

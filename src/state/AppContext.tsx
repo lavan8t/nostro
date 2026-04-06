@@ -37,6 +37,7 @@ export interface ContextMenuState {
 
 export interface WindowState {
   id: string;
+  title?: string;
   x: number;
   y: number;
   width: number;
@@ -75,6 +76,7 @@ export interface AppState {
   autoArrange: boolean;
   isBooted: boolean;
   isLoggedIn: boolean;
+  bsod: boolean;
 }
 
 // --------------------------------------------------
@@ -106,24 +108,27 @@ export type Action =
   | { type: "REMOVE_ICON"; payload: string }
   | { type: "BOOT_OS" }
   | { type: "LOG_IN" }
-  | { type: "LOG_OUT" };
+  | { type: "LOG_OUT" }
+  | { type: "TRIGGER_BSOD" };
 
 // --------------------------------------------------
 // REDUCER
 // --------------------------------------------------
 
 export const initialState: AppState = {
-  osIndex: 3, // Defaulting to Windows 10
+  osIndex: 3,
   startMenuOpen: false,
   windows: [],
   notepad: { text: "" },
   paint: { strokes: [] },
   isBooted: false,
   isLoggedIn: false,
+  bsod: false,
   contextMenu: { isOpen: false, x: 0, y: 0, items: [] },
   icons: [
     { id: "computer", x: 10, y: 10 },
     { id: "recycle", x: 10, y: 100 },
+    { id: "terminal", x: 10, y: 190, type: "terminal", label: "Command Prompt" },
   ],
   recycleBinFilled: true,
   autoArrange: true,
@@ -318,6 +323,9 @@ export const appReducer = (state: AppState, action: Action): AppState => {
         ...state,
         icons: state.icons.filter((icon) => icon.id !== action.payload),
       };
+
+    case "TRIGGER_BSOD":
+      return { ...state, bsod: true, windows: [], startMenuOpen: false };
 
     default:
       return state;
