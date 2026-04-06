@@ -1,16 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
-interface Win10LoginProps {
-  onLogin: () => void;
-  isLoading: boolean;
-}
+import { useAppContext } from "../../state/AppContext";
 
 type Phase = "boot" | "welcome" | "done";
 
-export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
+export default function Win10Login({ onUnlock }: { onUnlock: () => void }) {
   const [phase, setPhase] = useState<Phase>("boot");
+  const { dispatch } = useAppContext();
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -22,12 +19,14 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
       // Welcome screen for 3.5 seconds then cut to desktop
       timer = setTimeout(() => {
         setPhase("done");
-        onLogin();
+        dispatch({ type: "LOG_IN" });
+        localStorage.setItem("nostro_logged_in", "true");
+        onUnlock();
       }, 3500);
     }
 
     return () => clearTimeout(timer);
-  }, [phase, onLogin]);
+  }, [phase, dispatch, onUnlock]);
 
   // ── Phase: boot ───────────────────────────────────────────────────────────
   if (phase === "boot") {
@@ -36,10 +35,9 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
         className="h-screen w-screen overflow-hidden cursor-none select-none flex flex-col items-center justify-center"
         style={{ background: "#000000" }}
       >
-        {/* Windows logo — centered, pushed slightly above mid */}
         <div style={{ marginBottom: 100 }}>
           <img
-            src="/assets/win10/start.png"
+            src="/assets/win10/start.avif"
             alt="Windows 10"
             style={{
               width: 138,
@@ -50,12 +48,6 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
             draggable={false}
           />
         </div>
-
-        {/*
-         * Loading video — constrained to a small loader-sized box (60×60).
-         * object-contain keeps the video centred inside without cropping.
-         * The black bg matches so no letterboxing is visible.
-         */}
         <div
           style={{
             position: "absolute",
@@ -66,14 +58,10 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
           }}
         >
           <img
-  src="/assets/win10/windowsLoadingScreen.gif"
-  alt=""
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-  }}
-/>
+            src="/assets/win10/windowsLoadingScreen.gif"
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
         </div>
       </div>
     );
@@ -90,38 +78,33 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Blur + darken overlay */}
       <div
-  className="absolute inset-0"
-  style={{
-    background: "rgba(0,0,0,0.45)",
-  }}
-/>
-
-      {/* Centred user panel */}
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-center"
-      >
-        {/* User avatar circle */}
+        className="absolute inset-0"
+        style={{ background: "rgba(0,0,0,0.45)" }}
+      />
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-  style={{
-    width: 160,
-    height: 160,
-    borderRadius: "50%",
-    border: "2px solid rgba(255,255,255,0.15)",
-    overflow: "hidden",
-    marginBottom: 20,
-  }}
->
-  <img
-    src="/assets/win10/Windows_10_Default_Profile_Picture.svg"
-    alt="User"
-    style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
-    draggable={false}
-  />
-</div>
-
-        {/* Username */}
+          style={{
+            width: 160,
+            height: 160,
+            borderRadius: "50%",
+            border: "2px solid rgba(255,255,255,0.15)",
+            overflow: "hidden",
+            marginBottom: 20,
+          }}
+        >
+          <img
+            src="/assets/win10/Windows_10_Default_Profile_Picture.svg"
+            alt="User"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              pointerEvents: "none",
+            }}
+            draggable={false}
+          />
+        </div>
         <div
           style={{
             fontFamily: '"Segoe UI", Arial, sans-serif',
@@ -135,8 +118,6 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
         >
           User
         </div>
-
-        {/* Spinner + Welcome — side by side */}
         <div
           style={{
             display: "flex",
@@ -145,30 +126,15 @@ export default function Win10Login({ onLogin, isLoading }: Win10LoginProps) {
             gap: 8,
           }}
         >
-          {/*
-           * Same video reused as the small welcome spinner.
-           * Constrained to 22×22 to match the dotted spinner size from Image 2.
-           */}
           <div
-            style={{
-              width: 26,
-              height: 26,
-              overflow: "hidden",
-              flexShrink: 0,
-            }}
+            style={{ width: 26, height: 26, overflow: "hidden", flexShrink: 0 }}
           >
             <img
-  src="/assets/win10/windowsLoadingScreen.gif"
-  alt=""
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-  }}
-/>
+              src="/assets/win10/windowsLoadingScreen.gif"
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
           </div>
-
-          {/* Welcome text */}
           <span
             style={{
               fontFamily: '"Segoe UI", Arial, sans-serif',

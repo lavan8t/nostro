@@ -1,120 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAppContext, DesktopIconState, MenuItem } from "../state/AppContext";
+import { makeWindow } from "../state/windowFactory";
 
 // --------------------------------------------------
-// HELPER: Crossfade Text
+// FALLBACK ICON (White Document with Folded Corner)
 // --------------------------------------------------
-
-const CrossfadeText = ({ text }: { text: string }) => {
-  const [displayTexts, setDisplayTexts] = useState<{
-    current: string;
-    prev: string | null;
-  }>({
-    current: text,
-    prev: null,
-  });
-  const [fading, setFading] = useState(false);
-
-  useEffect(() => {
-    if (text !== displayTexts.current) {
-      setDisplayTexts((d) => ({ current: text, prev: d.current }));
-      setFading(true);
-
-      const timer = setTimeout(() => {
-        setFading(false);
-        setDisplayTexts({ current: text, prev: null });
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [text]);
-
-  return (
-    <div className="relative h-[1.2em] w-full text-center">
-      {displayTexts.prev && (
-        <span
-          className="absolute top-0 left-0 right-0 transition-opacity duration-300 ease-in-out"
-          style={{ opacity: fading ? 0 : 0 }}
-        >
-          {displayTexts.prev}
-        </span>
-      )}
-      <span
-        className="absolute top-0 left-0 right-0 transition-opacity duration-300 ease-in-out"
-        style={{ opacity: fading ? 0 : 1 }}
-      >
-        {displayTexts.current}
-      </span>
-    </div>
-  );
-};
-
-// --------------------------------------------------
-// HELPER: Crossfade Image
-// --------------------------------------------------
-
-const CrossfadeImage = ({ src, alt }: { src: string; alt: string }) => {
-  const [layers, setLayers] = useState<{
-    current: string;
-    prev: string | null;
-  }>({ current: src, prev: null });
-  const [showNext, setShowNext] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    if (src !== layers.current) {
-      setLayers((l) => ({ current: src, prev: l.current }));
-      setShowNext(false);
-      setHasError(false);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setShowNext(true);
-        });
-      });
-      const timer = setTimeout(() => {
-        setLayers({ current: src, prev: null });
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [src]);
-
-  return (
-    <div className="relative w-8 h-8">
-      {layers.prev && (
-        <img
-          src={layers.prev}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-500"
-          style={{ opacity: showNext ? 0 : 1 }}
-          draggable={false}
-        />
-      )}
-      {!hasError && src ? (
-        <img
-          src={layers.current}
-          alt={alt}
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-500"
-          style={{ opacity: showNext ? 1 : 0 }}
-          draggable={false}
-          onError={() => setHasError(true)}
-        />
-      ) : (
-        <div
-          className="absolute inset-0 flex items-center justify-center rounded-sm bg-gray-400/40 transition-opacity duration-500"
-          style={{ opacity: showNext ? 1 : 0 }}
-        >
-          <div className="w-3 h-3 bg-white/40 rounded-sm" />
-        </div>
-      )}
-    </div>
-  );
-};
+const FallbackFileIcon = () => (
+  <div className="absolute inset-0 flex items-center justify-center drop-shadow-md">
+    <svg
+      viewBox="0 0 24 24"
+      fill="white"
+      stroke="#666"
+      strokeWidth="1"
+      className="w-[85%] h-[85%]"
+    >
+      <path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+      <path d="M14 2v6h6" fill="#eee" />
+    </svg>
+  </div>
+);
 
 // --------------------------------------------------
 // COMPONENT
 // --------------------------------------------------
-
 export default function DesktopIcon({
   icon,
   index,
@@ -123,111 +33,169 @@ export default function DesktopIcon({
   index: number;
 }) {
   const { state, dispatch } = useAppContext();
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isSelected, setIsSelected] = useState(false);
 
-  // OS Config
+  // --- Refs ---
+  const nodeRef = useRef<HTMLDivElement>(null);
+  const isPointerDown = useRef(false);
+  const isDraggingRef = useRef(false);
+  const pointerStart = useRef({ x: 0, y: 0 });
+  const posStart = useRef({ x: 0, y: 0 });
+
+  // --- State ---
+  const [selected, setSelected] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Determine properties
   const osIndex = state.osIndex;
   const isClassic = osIndex <= 1;
-
-  // Determine Label & Type
   const iconType = icon.type || icon.id;
+
   let label = icon.label || "Icon";
-  if (iconType === "computer") {
-    if (osIndex === 0 || osIndex === 1) label = "My Computer";
-    else if (osIndex === 2) label = "Computer";
-    else label = "This PC";
-  } else if (iconType === "recycle") {
-    label = "Recycle Bin";
-  } else if (iconType === "terminal") {
-    if (osIndex === 0) label = "MS-DOS Prompt";
-    else if (osIndex === 3) label = "Windows PowerShell";
-    else label = "Command Prompt";
-  }
+  if (iconType === "computer")
+    label =
+      osIndex <= 1 ? "My Computer" : osIndex === 2 ? "Computer" : "This PC";
+  if (iconType === "recycle")
+    label = state.recycleBinFilled ? "Recycle Bin (Full)" : "Recycle Bin";
 
-  // Determine Icon Path
-  let iconPath = "";
-  const osDir = ["win98", "winxp", "win7", "win10"][state.osIndex] || "win10";
-
-  if (iconType === "computer") {
-    iconPath = `/assets/${osDir}/icons/computer.png`;
-  } else if (iconType === "recycle") {
-    const status = state.recycleBinFilled ? "full" : "empty";
-    iconPath = `/assets/${osDir}/icons/recycle_bin_${status}.png`;
-  } else if (iconType === "folder") {
-    iconPath = `/assets/${osDir}/icons/folder.png`;
-  } else if (iconType === "text") {
-    iconPath = `/assets/${osDir}/icons/text.png`;
-  } else if (iconType === "shortcut") {
-    iconPath = `/assets/${osDir}/icons/shortcut.png`;
-  } else if (iconType === "bitmap") {
-    iconPath = `/assets/${osDir}/icons/bitmap.png`;
-  } else if (iconType === "terminal") {
-    iconPath = `/assets/${osDir}/icons/terminal.png`;
-  }
-
-  // Grid Logic
+  // --- Grid & Positioning ---
   const GRID_SIZE_X = 75;
   const GRID_SIZE_Y = 100;
-
-  // Calculate Position
-  let posX = icon.x;
-  let posY = icon.y;
+  let targetX = icon.x;
+  let targetY = icon.y;
 
   if (state.autoArrange) {
-    const col = Math.floor(index / 6);
-    const row = index % 6;
-    posX = 10 + col * GRID_SIZE_X;
-    posY = 10 + row * GRID_SIZE_Y;
+    const maxRows = Math.floor(
+      (typeof window !== "undefined" ? window.innerHeight - 80 : 800) /
+        GRID_SIZE_Y,
+    );
+    const rows = maxRows > 0 ? maxRows : 6;
+    const col = Math.floor(index / rows);
+    const row = index % rows;
+    targetX = 10 + col * GRID_SIZE_X;
+    targetY = 10 + row * GRID_SIZE_Y;
   }
 
-  // Handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    e.stopPropagation();
-    setIsSelected(true);
+  const [pos, setPos] = useState({ x: targetX, y: targetY });
 
-    if (!state.autoArrange) {
-      setIsDragging(true);
-      setDragOffset({ x: e.clientX - posX, y: e.clientY - posY });
+  // Keep local pos synced with global pos (unless we are actively dragging)
+  useEffect(() => {
+    if (!isDraggingRef.current) setPos({ x: targetX, y: targetY });
+  }, [targetX, targetY]);
+
+  // --- Icon Image Resolution ---
+  const getIconFileName = () => {
+    switch (iconType) {
+      case "computer":
+        return "computer.png";
+      case "recycle":
+        return state.recycleBinFilled
+          ? "recycle_bin_full.png"
+          : "recycle_bin_empty.png";
+      case "folder":
+        return "folder.png";
+      case "text":
+        return "text.png";
+      case "shortcut":
+        return "shortcut.png";
+      case "bitmap":
+        return "bitmap.png";
+      default:
+        return "default.png";
     }
   };
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        dispatch({
-          type: "UPDATE_ICON_POS",
-          payload: {
-            id: icon.id,
-            x: e.clientX - dragOffset.x,
-            y: e.clientY - dragOffset.y,
-          },
-        });
-      }
-    };
+  const osDir = ["win98", "winxp", "win7", "win10"][osIndex] || "win10";
+  const iconPath = `/assets/${osDir}/icons/${getIconFileName()}`;
+  const [imgError, setImgError] = useState(false);
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
+  // --- Drag & Drop via Pointer Events ---
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // Only left click
+    e.stopPropagation(); // Stop Desktop from deselecting
 
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
+    setSelected(true);
+    e.currentTarget.setPointerCapture(e.pointerId); // LOCK the mouse to this icon
+
+    isPointerDown.current = true;
+    pointerStart.current = { x: e.clientX, y: e.clientY };
+    posStart.current = { ...pos };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDown.current) return;
+
+    const dx = e.clientX - pointerStart.current.x;
+    const dy = e.clientY - pointerStart.current.y;
+
+    if (!isDraggingRef.current && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      isDraggingRef.current = true;
+      setIsDragging(true);
     }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging, dragOffset, dispatch, icon.id]);
 
+    if (isDraggingRef.current) {
+      setPos({ x: posStart.current.x + dx, y: posStart.current.y + dy });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDown.current) return;
+
+    isPointerDown.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId); // UNLOCK mouse
+
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+
+      dispatch({
+        type: "UPDATE_ICON_POS",
+        payload: { id: icon.id, x: pos.x, y: pos.y },
+      });
+
+      if (state.autoArrange) {
+        dispatch({ type: "SET_AUTO_ARRANGE", payload: false });
+      }
+    }
+  };
+
+  // --- App Launching (Open) ---
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    let baseId = `app-${icon.id}`;
+    if (iconType === "text") baseId = `notepad-${icon.id}`;
+    else if (iconType === "bitmap") baseId = `paint-${icon.id}`;
+    else if (iconType === "computer" || iconType === "folder")
+      baseId = `explorer-${icon.id}`;
+
+    const maxZ =
+      state.windows.length > 0 ? Math.max(...state.windows.map((w) => w.z)) : 0;
+
+    // Calculate cascading offset: 25px per existing window
+    const offset = state.windows.length * 25;
+    const spawnX = 100 + offset;
+    const spawnY = 100 + offset;
+
+    dispatch({
+      type: "ADD_WINDOW",
+      payload: makeWindow({
+        id: `${baseId}-${Date.now()}`,
+        z: maxZ + 1,
+        focused: true,
+        x: spawnX,
+        y: spawnY,
+      }),
+    });
+  };
+
+  // --- Context Menu (Stripped Down) ---
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setSelected(true);
 
     const items: MenuItem[] = [
-      { label: "Open", action: () => alert(`Opening ${label}...`) },
+      { label: "Open", action: () => handleDoubleClick(e) },
       { separator: true, label: "" },
     ];
 
@@ -240,62 +208,77 @@ export default function DesktopIcon({
       items.push({ separator: true, label: "" });
     }
 
-    if (iconType !== "computer" && iconType !== "recycle") {
-      items.push({
-        label: "Delete",
-        action: () => dispatch({ type: "REMOVE_ICON", payload: icon.id }),
-      });
-      items.push({ separator: true, label: "" });
-    }
-
     items.push({ label: "Properties", disabled: true });
-
     dispatch({
       type: "OPEN_CONTEXT_MENU",
       payload: { x: e.clientX, y: e.clientY, items },
     });
   };
 
+  // --- Click Outside to Deselect ---
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (nodeRef.current && !nodeRef.current.contains(e.target as Node)) {
+        setSelected(false);
+      }
+    };
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // --- Styles ---
   const textStyle: React.CSSProperties = isClassic
     ? { color: "white" }
     : { color: "white", textShadow: "1px 1px 2px rgba(0,0,0,0.8)" };
 
   return (
     <div
-      className={`absolute flex flex-col items-center justify-start p-1 w-17.5 select-none cursor-default group`}
-      style={{ left: posX, top: posY, opacity: isDragging ? 0.7 : 1 }}
-      onMouseDown={handleMouseDown}
-      onContextMenu={handleContextMenu}
-      onDoubleClick={() => {
-        if (iconType === "terminal") {
-          const maxZ = state.windows.reduce((max, w) => Math.max(max, w.z), 0);
-          dispatch({
-            type: "ADD_WINDOW",
-            payload: {
-              id: `wnd-terminal-${Date.now()}`,
-              x: 150, y: 100, width: 720, height: 480,
-              z: maxZ + 1, minimized: false, maximized: false, focused: true,
-            },
-          });
-        } else {
-          alert(`Opening ${label}...`);
-        }
+      ref={nodeRef}
+      className="absolute flex flex-col items-center justify-start p-1 w-17.5 select-none group"
+      style={{
+        left: pos.x,
+        top: pos.y,
+        opacity: isDragging ? 0.6 : 1,
+        zIndex: 0, // Icons always stay behind windows
+        touchAction: "none",
       }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
-      <div className={`mb-1 relative ${isSelected ? "opacity-80" : ""}`}>
-        <CrossfadeImage src={iconPath} alt={label} />
-      </div>
+      {/* Icon Image */}
       <div
-        className={`text-[11px] text-center leading-tight px-1 rounded-sm ${
-          isSelected
-            ? isClassic
-              ? "bg-[#000080] text-white"
-              : "bg-[#316ac5] bg-opacity-60 text-white"
-            : ""
-        }`}
-        style={!isSelected ? textStyle : {}}
+        className={`mb-1 w-8 h-8 relative ${selected ? "opacity-80 drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" : ""}`}
       >
-        <CrossfadeText text={label} />
+        {!imgError ? (
+          <img
+            src={iconPath}
+            alt={label}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-contain"
+            draggable={false}
+            style={{ pointerEvents: "none" }}
+          />
+        ) : (
+          <FallbackFileIcon />
+        )}
+      </div>
+
+      {/* Label */}
+      <div
+        className={`text-[11px] text-center leading-tight px-1 rounded-sm line-clamp-3 wrap-break-word w-full ${
+          selected
+            ? isClassic
+              ? "bg-[#000080] text-white border border-dotted border-white/50"
+              : "bg-[#316ac5] bg-opacity-60 text-white"
+            : "border border-transparent"
+        }`}
+        style={!selected ? textStyle : {}}
+      >
+        {label}
       </div>
     </div>
   );

@@ -69,7 +69,6 @@ export default function Taskbar() {
       dispatch({ type: "RESTORE_WINDOW", payload: topWindow.id });
     } else if (topWindow.focused) {
       if (sorted.length > 1) {
-        // Cycle
         const next = sorted[1];
         bringToFront(next.id);
       } else {
@@ -103,7 +102,7 @@ export default function Taskbar() {
       const now = Date.now();
       if (now - lastSwitchTime.current > TIME_DELAY) {
         const direction = scrollAccumulator.current > 0 ? 1 : -1;
-        const totalThemes = 4; // Removed Win11, so total is 4 (0,1,2,3)
+        const totalThemes = 4;
         const current = localOsIndex.current;
         const newIndex = (current + direction + totalThemes) % totalThemes;
         if (newIndex !== current) {
@@ -123,7 +122,7 @@ export default function Taskbar() {
         <button
           ref={startButtonRef}
           onClick={() => dispatch({ type: "TOGGLE_START_MENU" })}
-          className={`px-1 h-full flex items-center gap-1 font-bold active:translate-y-[1px] active:translate-x-[1px] ${state.startMenuOpen ? "active" : ""} transition-all duration-300`}
+          className={`px-1 h-full flex items-center gap-1 font-bold active:translate-y-px active:translate-x-px ${state.startMenuOpen ? "active" : ""} transition-all duration-300`}
           style={{
             backgroundColor: "var(--ButtonFace)",
             borderTop: "1px solid var(--ButtonHilight)",
@@ -134,13 +133,13 @@ export default function Taskbar() {
               ? "inset 1px 1px 0 0 var(--ButtonShadow)"
               : "inset -1px -1px 0 var(--ButtonShadow), inset 1px 1px 0 var(--ButtonFace)",
             color: "var(--ButtonText)",
-            fontSize: "11px",
+            fontSize: "13px", // Bumped Up
             fontFamily: "var(--os-font)",
             minWidth: "60px",
           }}
         >
           <img src="/assets/win98/start.avif" alt="" className="w-4 h-4" />
-          <span className="pt-[1px]">Start</span>
+          <span className="pt-px">Start</span>
         </button>
       );
     }
@@ -165,7 +164,7 @@ export default function Taskbar() {
       const isWin7 = index === 2;
       const iconPath = isWin7
         ? "/assets/win7/start.avif"
-        : "/assets/win10/start.avif";
+        : "/assets/win10/start.bmp";
       return (
         <button
           ref={startButtonRef}
@@ -186,7 +185,6 @@ export default function Taskbar() {
   const taskbarHeight =
     state.osIndex === 0 || state.osIndex === 1 ? "30px" : "40px";
 
-  // Dynamic styles for the Taskbar container
   const taskbarStyle: React.CSSProperties = {
     height: taskbarHeight,
     background: "var(--os-taskbar-bg)",
@@ -202,7 +200,7 @@ export default function Taskbar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 flex items-center select-none z-[9999] transition-all duration-500 ease-in-out"
+      className="fixed bottom-0 left-0 right-0 flex items-center select-none z-9999 transition-all duration-500 ease-in-out"
       style={taskbarStyle}
     >
       <div className="start-menu-container">
@@ -212,7 +210,7 @@ export default function Taskbar() {
         <div className="flex items-center h-full mr-1">
           {renderStartButton()}
           {state.osIndex === 0 && (
-            <div className="w-[2px] h-[20px] mx-1 border-l border-[var(--ButtonShadow)] border-r border-[var(--ButtonHilight)]" />
+            <div className="w-0.5 h-5 mx-1 border-l border-(--ButtonShadow) border-r" />
           )}
         </div>
 
@@ -233,7 +231,11 @@ export default function Taskbar() {
                   {getProgramIcon(programId)}
                 </div>
                 {state.osIndex <= 1 && (
-                  <span className="truncate font-normal">{programId}</span>
+                  <span
+                    className={`truncate font-normal ${state.osIndex === 0 ? "text-[13px]" : "text-[11px]"}`}
+                  >
+                    {programId}
+                  </span>
                 )}
               </button>
             );
@@ -266,7 +268,11 @@ export default function Taskbar() {
         }
       >
         <span
-          className="text-xs font-normal"
+          className={
+            state.osIndex === 0
+              ? "text-[13px] font-normal"
+              : "text-xs font-normal"
+          }
           style={{ fontFamily: "var(--os-font)" }}
         >
           {time}
