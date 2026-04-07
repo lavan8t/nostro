@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useAppContext, WindowState } from "../state/AppContext";
 import StartMenu from "./StartMenu";
+import Calendar from "../apps/Calendar/Calendar";
 import {
   getProgramId,
   getProgramIcon,
@@ -11,6 +12,7 @@ import {
 
 export default function Taskbar() {
   const { state, dispatch } = useAppContext();
+  const [showCalendar, setShowCalendar] = useState(false);
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const [time, setTime] = useState("");
   const scrollAccumulator = useRef(0);
@@ -243,40 +245,53 @@ export default function Taskbar() {
         </div>
       </div>
 
-      <div
-        className={`flex items-center px-2 h-full ml-auto cursor-ns-resize hover:bg-black/5 transition-all duration-500 ${state.osIndex === 0 ? "border-l border-gray-400 inset-shadow" : ""}`}
-        onWheel={handleScroll}
-        title="Scroll to switch OS"
-        style={
-          state.osIndex === 0
-            ? {
-                borderTop: "1px solid var(--ButtonShadow)",
-                borderLeft: "1px solid var(--ButtonShadow)",
-                borderRight: "1px solid var(--ButtonHilight)",
-                borderBottom: "1px solid var(--ButtonHilight)",
-                boxShadow:
-                  "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)",
-                backgroundColor: "var(--ButtonFace)",
-                minWidth: "80px",
-                justifyContent: "center",
-              }
-            : {
-                minWidth: "80px",
-                justifyContent: "center",
-                color: "white",
-              }
-        }
-      >
-        <span
-          className={
+      {/* Clock and Calendar Container */}
+      <div className="relative flex items-center h-full ml-auto">
+        
+        {/* Calendar Popup */}
+        {showCalendar && (
+          <div className="absolute bottom-full right-0 mb-1 w-64 shadow-xl z-50">
+            <Calendar winId="sys-calendar" />
+          </div>
+        )}
+
+        {/* Clickable Clock Area */}
+        <div
+          onClick={() => setShowCalendar(!showCalendar)}
+          className={`flex items-center px-2 h-full cursor-pointer hover:bg-black/5 transition-all duration-500 ${state.osIndex === 0 ? "border-l border-gray-400 inset-shadow" : ""}`}
+          onWheel={handleScroll}
+          title="Click to toggle Calendar | Scroll to switch OS"
+          style={
             state.osIndex === 0
-              ? "text-[13px] font-normal"
-              : "text-xs font-normal"
+              ? {
+                  borderTop: "1px solid var(--ButtonShadow)",
+                  borderLeft: "1px solid var(--ButtonShadow)",
+                  borderRight: "1px solid var(--ButtonHilight)",
+                  borderBottom: "1px solid var(--ButtonHilight)",
+                  boxShadow:
+                    "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)",
+                  backgroundColor: "var(--ButtonFace)",
+                  minWidth: "80px",
+                  justifyContent: "center",
+                }
+              : {
+                  minWidth: "80px",
+                  justifyContent: "center",
+                  color: "white",
+                }
           }
-          style={{ fontFamily: "var(--os-font)" }}
         >
-          {time}
-        </span>
+          <span
+            className={
+              state.osIndex === 0
+                ? "text-[13px] font-normal"
+                : "text-xs font-normal"
+            }
+            style={{ fontFamily: "var(--os-font)" }}
+          >
+            {time}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -15,6 +15,9 @@ import BSODOverlay from "./BSODOverlay";
 // HOOKS
 // --------------------------------------------------
 import Explorer, { getExplorerMenus } from "../apps/Explorer/Explorer";
+import Calendar, { getCalendarMenus } from "../apps/Calendar/Calendar";
+import MediaPlayer, { getMediaPlayerMenus } from "../apps/MediaPlayer/MediaPlayer";
+import Paint, { getPaintMenus } from "../apps/Paint/Paint";
 
 function useViewportSize() {
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -46,14 +49,30 @@ export default function Desktop() {
     if (id.includes("terminal") || id.includes("cmd") || id.includes("powershell")) {
       return { content: <TerminalApp winId={id} /> };
     }
-    // --- ADD THIS BLOCK ---
     if (id.includes("explorer")) {
       return {
         content: <Explorer winId={id} />,
         menus: getExplorerMenus(dispatch, id),
       };
     }
-    // ----------------------
+    if (id.includes("calendar")) {
+      return {
+        content: <Calendar winId={id} />,
+        menus: getCalendarMenus(dispatch, id),
+      };
+    }
+    if (id.includes("media")) {
+      return {
+        content: <MediaPlayer winId={id} />,
+        menus: getMediaPlayerMenus(dispatch, id),
+      };
+    }
+    if (id.includes("paint") || id.includes("bitmap")) {
+      return {
+        content: <Paint winId={id} />,
+        menus: getPaintMenus(dispatch, id),
+      };
+    }
     return { content: null };
   };
 
@@ -78,12 +97,10 @@ export default function Desktop() {
           },
         ],
       },
-      // --- WIRE THIS UP RIGHT HERE ---
       {
         label: "Line up Icons",
         action: () => dispatch({ type: "ALIGN_ICONS_TO_GRID" }),
       },
-      // -------------------------------
       { separator: true, label: "" },
       { label: "Refresh", action: () => window.location.reload() },
       { separator: true, label: "" },
@@ -132,6 +149,21 @@ export default function Desktop() {
                 },
               }),
           },
+          // --- ADDED THIS SO YOU CAN SPAWN THE MEDIA PLAYER ---
+          {
+            label: "Media File",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `media-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "media",
+                  label: "Sample Video.avi",
+                },
+              }),
+          },
         ],
       },
     ];
@@ -141,6 +173,7 @@ export default function Desktop() {
       payload: { x: e.clientX, y: e.clientY, items },
     });
   };
+  
   return (
     <main
       onContextMenu={handleContextMenu}
