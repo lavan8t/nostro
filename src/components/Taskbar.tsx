@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { useAppContext, WindowState } from "../state/AppContext";
+import { useAppContext, WindowState, MenuItem } from "../state/AppContext";
 import StartMenu from "./StartMenu";
 import {
   getProgramId,
@@ -115,6 +115,48 @@ export default function Taskbar() {
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (state.osIndex !== 3) return; // Only for Windows 10
+    
+    e.preventDefault();
+    e.stopPropagation();
+
+    const win10TaskbarItems: MenuItem[] = [
+      {
+        label: "Toolbars",
+        disabled: true,
+        submenu: [{ label: "Address", disabled: true }, { label: "Links", disabled: true }, { label: "Desktop", disabled: true }, { separator: true, label: "" }, { label: "New toolbar...", disabled: true }],
+      },
+      {
+        label: "Search",
+        disabled: true,
+        submenu: [{ label: "Hidden", disabled: true }, { label: "Show search icon", disabled: true }, { label: "Show search box", disabled: true }],
+      },
+      { label: "Show Task View button", disabled: true },
+      { label: "Show People on the taskbar", disabled: true },
+      { label: "Show Windows Ink Workspace button", disabled: true },
+      { label: "Show touch keyboard button", disabled: true },
+      { separator: true, label: "" },
+      { label: "Cascade windows", disabled: true },
+      { label: "Show windows stacked", disabled: true },
+      { label: "Show windows side by side", disabled: true },
+      { 
+        label: "Show the desktop", 
+        action: () => state.windows.forEach(w => dispatch({ type: "MINIMIZE_WINDOW", payload: w.id })) 
+      },
+      { separator: true, label: "" },
+      { label: "Task Manager", disabled: true }, 
+      { separator: true, label: "" },
+      { label: "✓ Lock the taskbar", disabled: true }, 
+      { label: "Taskbar settings", disabled: true },
+    ];
+
+    dispatch({
+      type: "OPEN_CONTEXT_MENU",
+      payload: { x: e.clientX, y: e.clientY, items: win10TaskbarItems },
+    });
+  };
+
   const renderStartButton = () => {
     const index = state.osIndex;
     if (index === 0) {
@@ -202,6 +244,7 @@ export default function Taskbar() {
     <div
       className="fixed bottom-0 left-0 right-0 flex items-center select-none z-9999 transition-all duration-500 ease-in-out"
       style={taskbarStyle}
+      onContextMenu={handleContextMenu}
     >
       <div className="start-menu-container">
         <StartMenu />
@@ -281,3 +324,4 @@ export default function Taskbar() {
     </div>
   );
 }
+

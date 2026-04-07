@@ -118,6 +118,7 @@ export const initialState: AppState = {
     { id: "computer", x: 10, y: 10 },
     { id: "recycle", x: 10, y: 100 },
     { id: "terminal", x: 10, y: 190, type: "terminal", label: "Command Prompt" },
+    { id: "controlpanel", x: 10, y: 280, type: "controlpanel", label: "Control Panel" },
   ],
   recycleBinFilled: true,
   autoArrange: true,
@@ -288,7 +289,7 @@ export const appReducer = (state: AppState, action: Action): AppState => {
       return { ...state, isBooted: true };
     case "LOG_IN":
       return { ...state, isLoggedIn: true };
-    case "LOG_OUT":
+    case "LOG_OUT": 
       return {
         ...state,
         isBooted: false,

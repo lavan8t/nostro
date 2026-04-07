@@ -84,3 +84,29 @@ body {
   color: var(--foreground);
   font-family: var(--os-font), system-ui, sans-serif;
 }
+
+/* --------------------------------------------------
+   DESKTOP ICON — INLINE RENAME INPUT
+   Defined here (not inline) so ::selection can be styled
+-------------------------------------------------- */
+.icon-rename-input {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  caret-color: #000000;
+  border: 1px solid #0078d7;
+  outline: none;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.25;
+  padding: 0 4px;
+  border-radius: 0;
+  width: 100%;
+  font-family: inherit;
+  z-index: 10;
+}
+
+.icon-rename-input::selection {
+  background-color: #0078d7;
+  color: #ffffff;
+}
+

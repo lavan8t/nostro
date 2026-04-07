@@ -40,22 +40,30 @@ export default function DesktopIcon({
   const isDraggingRef = useRef(false);
   const pointerStart = useRef({ x: 0, y: 0 });
   const posStart = useRef({ x: 0, y: 0 });
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   // --- State ---
   const [selected, setSelected] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
 
   // Determine properties
   const osIndex = state.osIndex;
   const isClassic = osIndex <= 1;
   const iconType = icon.type || icon.id;
 
+  // Built-in icons that cannot be renamed or deleted
+  const BUILTIN_IDS = ["computer", "recycle", "terminal", "controlpanel"];
+  const isBuiltin =
+    BUILTIN_IDS.includes(icon.id) || BUILTIN_IDS.includes(iconType);
+
   let label = icon.label || "Icon";
   if (iconType === "computer")
     label =
       osIndex <= 1 ? "My Computer" : osIndex === 2 ? "Computer" : "This PC";
   if (iconType === "recycle")
-    label = state.recycleBinFilled ? "Recycle Bin (Full)" : "Recycle Bin";
+    label = "Recycle Bin";
 
   // --- Grid & Positioning ---
   const GRID_SIZE_X = 75;
@@ -82,23 +90,32 @@ export default function DesktopIcon({
     if (!isDraggingRef.current) setPos({ x: targetX, y: targetY });
   }, [targetX, targetY]);
 
+  // Focus rename input when it appears
+  useEffect(() => {
+    if (isRenaming && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [isRenaming]);
   // --- Icon Image Resolution ---
   const getIconFileName = () => {
     switch (iconType) {
       case "computer":
-        return "computer.png";
+        return "computer.ico";
       case "recycle":
         return state.recycleBinFilled
-          ? "recycle_bin_full.png"
-          : "recycle_bin_empty.png";
+          ? "recycle_bin_full.ico"
+          : "recycle_bin_empty.ico";
       case "folder":
-        return "folder.png";
+        return "folder.ico";
       case "text":
-        return "text.png";
+        return "text.ico";
       case "shortcut":
-        return "shortcut.png";
-      case "bitmap":
-        return "bitmap.png";
+        return "shortcut.ico";
+      case "controlpanel":
+        return "controlpanel.ico";
+      case "terminal":
+        return "command_prompt.ico";
       default:
         return "default.png";
     }
@@ -110,11 +127,12 @@ export default function DesktopIcon({
 
   // --- Drag & Drop via Pointer Events ---
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return; // Only left click
-    e.stopPropagation(); // Stop Desktop from deselecting
+    if (e.button !== 0) return;
+    if (isRenaming) return;
+    e.stopPropagation();
 
     setSelected(true);
-    e.currentTarget.setPointerCapture(e.pointerId); // LOCK the mouse to this icon
+    e.currentTarget.setPointerCapture(e.pointerId);
 
     isPointerDown.current = true;
     pointerStart.current = { x: e.clientX, y: e.clientY };
@@ -141,7 +159,7 @@ export default function DesktopIcon({
     if (!isPointerDown.current) return;
 
     isPointerDown.current = false;
-    e.currentTarget.releasePointerCapture(e.pointerId); // UNLOCK mouse
+    e.currentTarget.releasePointerCapture(e.pointerId);
 
     if (isDraggingRef.current) {
       isDraggingRef.current = false;
@@ -161,6 +179,7 @@ export default function DesktopIcon({
   // --- App Launching (Open) ---
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isRenaming) return;
 
     let baseId = `app-${icon.id}`;
     if (iconType === "text") baseId = `notepad-${icon.id}`;
@@ -169,9 +188,10 @@ export default function DesktopIcon({
       baseId = `explorer-${icon.id}`;
 
     const maxZ =
-      state.windows.length > 0 ? Math.max(...state.windows.map((w) => w.z)) : 0;
+      state.windows.length > 0
+        ? Math.max(...state.windows.map((w) => w.z))
+        : 0;
 
-    // Calculate cascading offset: 25px per existing window
     const offset = state.windows.length * 25;
     const spawnX = 100 + offset;
     const spawnY = 100 + offset;
@@ -188,12 +208,88 @@ export default function DesktopIcon({
     });
   };
 
-  // --- Context Menu (Stripped Down) ---
+  // --- Rename helpers ---
+  const startRename = () => {
+    setRenameValue(label);
+    setIsRenaming(true);
+  };
+
+  const commitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== label) {
+      dispatch({
+        type: "RENAME_ICON",
+        payload: { id: icon.id, label: trimmed },
+      });
+    }
+    setIsRenaming(false);
+  };
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") commitRename();
+    if (e.key === "Escape") setIsRenaming(false);
+  };
+
+  // --- Context Menu ---
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setSelected(true);
 
+    // Windows 10 file context menu
+    if (osIndex === 3) {
+      const win10FileItems: MenuItem[] = [
+        { label: "Open", action: () => handleDoubleClick(e) },
+        { label: "Edit", disabled: true },
+        { label: "Print", disabled: true },
+        { label: "Scan with Microsoft Defender...", disabled: true },
+        { label: "Share", disabled: true },
+        {
+          label: "Open with",
+          submenu: [{ label: "Choose another app", disabled: true }],
+        },
+        {
+          label: "Give access to",
+          submenu: [{ label: "Specific people...", disabled: true }],
+        },
+        { label: "Restore previous versions", disabled: true },
+        {
+          label: "Send to",
+          submenu: [
+            { label: "Desktop (create shortcut)", disabled: true },
+            { label: "Documents", disabled: true },
+            { label: "Mail recipient", disabled: true },
+          ],
+        },
+        { separator: true, label: "" },
+        { label: "Cut", disabled: true },
+        { label: "Copy", disabled: true },
+        { separator: true, label: "" },
+        { label: "Create shortcut", disabled: true },
+        {
+          label: "Delete",
+          disabled: isBuiltin,
+          action: isBuiltin
+            ? undefined
+            : () => dispatch({ type: "REMOVE_ICON", payload: icon.id }),
+        },
+        {
+          label: "Rename",
+          disabled: isBuiltin,
+          action: isBuiltin ? undefined : startRename,
+        },
+        { separator: true, label: "" },
+        { label: "Properties", disabled: true },
+      ];
+
+      dispatch({
+        type: "OPEN_CONTEXT_MENU",
+        payload: { x: e.clientX, y: e.clientY, items: win10FileItems },
+      });
+      return;
+    }
+
+    // Classic context menu (Win98 / XP / 7)
     const items: MenuItem[] = [
       { label: "Open", action: () => handleDoubleClick(e) },
       { separator: true, label: "" },
@@ -208,6 +304,15 @@ export default function DesktopIcon({
       items.push({ separator: true, label: "" });
     }
 
+    if (!isBuiltin) {
+      items.push({ label: "Rename", action: startRename });
+      items.push({
+        label: "Delete",
+        action: () => dispatch({ type: "REMOVE_ICON", payload: icon.id }),
+      });
+      items.push({ separator: true, label: "" });
+    }
+
     items.push({ label: "Properties", disabled: true });
     dispatch({
       type: "OPEN_CONTEXT_MENU",
@@ -215,16 +320,17 @@ export default function DesktopIcon({
     });
   };
 
-  // --- Click Outside to Deselect ---
+  // --- Click Outside to Deselect / Commit Rename ---
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (nodeRef.current && !nodeRef.current.contains(e.target as Node)) {
         setSelected(false);
+        if (isRenaming) commitRename();
       }
     };
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isRenaming, renameValue]);
 
   // --- Styles ---
   const textStyle: React.CSSProperties = isClassic
@@ -239,7 +345,7 @@ export default function DesktopIcon({
         left: pos.x,
         top: pos.y,
         opacity: isDragging ? 0.6 : 1,
-        zIndex: 0, // Icons always stay behind windows
+        zIndex: 0,
         touchAction: "none",
       }}
       onPointerDown={handlePointerDown}
@@ -251,7 +357,11 @@ export default function DesktopIcon({
     >
       {/* Icon Image */}
       <div
-        className={`mb-1 w-8 h-8 relative ${selected ? "opacity-80 drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]" : ""}`}
+        className={`mb-1 w-8 h-8 relative ${
+          selected
+            ? "opacity-80 drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]"
+            : ""
+        }`}
       >
         {!imgError ? (
           <img
@@ -267,19 +377,33 @@ export default function DesktopIcon({
         )}
       </div>
 
-      {/* Label */}
-      <div
-        className={`text-[11px] text-center leading-tight px-1 rounded-sm line-clamp-3 wrap-break-word w-full ${
-          selected
-            ? isClassic
-              ? "bg-[#000080] text-white border border-dotted border-white/50"
-              : "bg-[#316ac5] bg-opacity-60 text-white"
-            : "border border-transparent"
-        }`}
-        style={!selected ? textStyle : {}}
-      >
-        {label}
-      </div>
+      {/* Label — inline rename input or static text */}
+      {isRenaming ? (
+        <input
+          ref={renameInputRef}
+          value={renameValue}
+          onChange={(e) => setRenameValue(e.target.value)}
+          onKeyDown={handleRenameKeyDown}
+          onBlur={commitRename}
+          onClick={(e) => e.stopPropagation()}
+          className="icon-rename-input"
+          maxLength={64}
+        />
+      ) : (
+        <div
+          className={`text-[11px] text-center leading-tight px-1 rounded-sm line-clamp-3 wrap-break-word w-full ${
+            selected
+              ? isClassic
+                ? "bg-[#000080] text-white border border-dotted border-white/50"
+                : "bg-[#316ac5] bg-opacity-60 text-white"
+              : "border border-transparent"
+          }`}
+          style={!selected ? textStyle : {}}
+        >
+          {label}
+        </div>
+      )}
     </div>
   );
 }
+

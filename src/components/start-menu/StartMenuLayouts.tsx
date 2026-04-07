@@ -85,8 +85,8 @@ function MenuItem({ label, icon, onClick, hasSubmenu }: any) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-3 py-1 hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] w-full text-left group"
-      style={{ color: "var(--MenuText)", fontSize: "13px" }}
+      className="flex items-center gap-2 px-3 py-1 text-[var(--MenuText)] hover:bg-[var(--Hilight)] hover:text-[var(--HilightText)] w-full text-left group"
+      style={{ fontSize: "13px" }}
     >
       <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
       <span className="flex-1">{label}</span>
@@ -580,39 +580,7 @@ export const WinClassicStartMenu = ({
               </span>
             </div>
           )}
-          <div className="flex-1 flex flex-col">
-            <MenuItem
-              label="Programs"
-              icon={<Icons.App color="gold" />}
-              hasSubmenu
-            />
-            <MenuItem
-              label="Documents"
-              icon={<Icons.App color="gold" />}
-              hasSubmenu
-            />
-            <MenuItem label="Settings" icon={<Icons.Settings />} hasSubmenu />
-            <MenuItem label="Find" icon={<Icons.App color="blue" />} />
-            <MenuItem label="Help" icon={<Icons.Settings />} />
-            <MenuItem label="Run..." icon={<Icons.App color="blue" />} />
-            <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-            <MenuItem
-              label="Notepad"
-              icon={<Icons.App />}
-              onClick={() => handleLaunch("wnd-notepad")}
-            />
-            <MenuItem
-              label="Paint"
-              icon={<Icons.App color="orange" />}
-              onClick={() => handleLaunch("wnd-paint")}
-            />
-            <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-            <MenuItem
-              label="Shut Down..."
-              icon={<Icons.Power />}
-              onClick={handleLogout}
-            />
-          </div>
+
         <div className="flex-1 flex flex-col">
           <MenuItem
             label="Programs"

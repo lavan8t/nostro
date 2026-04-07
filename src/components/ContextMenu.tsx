@@ -253,12 +253,13 @@ const Win10Item = ({ item, dispatch }: { item: MenuItem; dispatch: any }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="flex items-center px-2 py-1 cursor-default select-none relative"
+      className="flex items-center cursor-default select-none relative"
       style={{
+        padding: "3px 8px",
         backgroundColor: isActive ? "#3a3a3a" : "transparent",
         color: item.disabled ? "#666" : "white",
         fontFamily: "'Segoe UI', sans-serif",
-        fontSize: "13px",
+        fontSize: "12px",
       }}
     >
       <div className="w-8 shrink-0" />
@@ -364,12 +365,14 @@ const SubMenu = ({
     );
   }
 
+  const isTaskbarMenu = items.some((i) => i.label === "Taskbar settings");
+
   return (
     <div
-      className="min-w-50 py-1 z-99999 flex flex-col"
+      className="min-w-[200px] py-1 z-99999 flex flex-col"
       style={{
         backgroundColor: "#2b2b2b",
-        border: "1px solid #1f1f1f",
+        border: isTaskbarMenu ? "1px solid #777" : "1px solid #1f1f1f",
         boxShadow: "0 8px 16px rgba(0,0,0,0.35)",
         backdropFilter: "blur(20px)",
       }}
@@ -385,11 +388,47 @@ const SubMenu = ({
 // MAIN EXPORT
 // --------------------------------------------------
 
+const TASKBAR_HEIGHT = 40; // px — height of the OS taskbar
+const EDGE_MARGIN = 8;     // px — breathing room from every screen edge
+
 export default function ContextMenu() {
   const { state, dispatch } = useAppContext();
   const { contextMenu, osIndex } = state;
   const ref = useRef<HTMLDivElement>(null);
 
+  const [finalPos, setFinalPos] = useState({ x: contextMenu.x, y: contextMenu.y });
+
+  // Calculate clamp synchronously before paint to avoid flickering or tracking bugs
+  // using the "raw" coordinates directly from contextMenu state.
+  React.useLayoutEffect(() => {
+    if (!contextMenu.isOpen || !ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let x = contextMenu.x;
+    let y = contextMenu.y;
+
+    // Bottom boundary: above taskbar + margin
+    const maxBottom = vh - TASKBAR_HEIGHT - EDGE_MARGIN;
+    // Right boundary: don't go off right edge
+    const maxRight = vw - EDGE_MARGIN;
+
+    // Shift up if menu overflows the bottom safe zone
+    if (y + rect.height > maxBottom) {
+      y = Math.max(EDGE_MARGIN, maxBottom - rect.height);
+    }
+
+    // Shift left if menu overflows the right edge
+    if (x + rect.width > maxRight) {
+      x = Math.max(EDGE_MARGIN, maxRight - rect.width);
+    }
+
+    setFinalPos({ x, y });
+  }, [contextMenu.x, contextMenu.y, contextMenu.isOpen, contextMenu.items]);
+
+  // --- Close on outside click ---
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -410,7 +449,7 @@ export default function ContextMenu() {
     <div
       ref={ref}
       className="fixed z-99999"
-      style={{ left: contextMenu.x, top: contextMenu.y }}
+      style={{ left: finalPos.x, top: finalPos.y }}
     >
       <SubMenu items={contextMenu.items} osIndex={osIndex} />
     </div>

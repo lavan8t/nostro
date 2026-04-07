@@ -62,7 +62,76 @@ export default function Desktop() {
     const clickX = e.clientX;
     const clickY = e.clientY;
 
-    const items: MenuItem[] = [
+    // Windows 10 authentic right-click menu
+    const win10Items: MenuItem[] = [
+      {
+        label: "View",
+        submenu: [
+          { label: "Large icons" },
+          { label: "Medium icons" },
+          { label: "Small icons" },
+          { separator: true, label: "" },
+          { label: "Auto arrange icons" },
+          { label: "Align icons to grid" },
+          { separator: true, label: "" },
+          { label: "Show desktop icons" },
+        ],
+      },
+      {
+        label: "Sort by",
+        submenu: [
+          { label: "Name" },
+          { label: "Size" },
+          { label: "Item type" },
+          { label: "Date modified" },
+        ],
+      },
+      { label: "Refresh", action: () => window.location.reload() },
+      { separator: true, label: "" },
+      { label: "Paste", disabled: true },
+      { label: "Paste shortcut", disabled: true },
+      { separator: true, label: "" },
+      {
+        label: "New",
+        submenu: [
+          {
+            label: "Folder",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `folder-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "folder",
+                  label: "New Folder",
+                },
+              }),
+          },
+          { separator: true, label: "" },
+          {
+            label: "Text Document",
+            action: () =>
+              dispatch({
+                type: "ADD_ICON",
+                payload: {
+                  id: `text-${Date.now()}`,
+                  x: clickX,
+                  y: clickY,
+                  type: "text",
+                  label: "New Text Document.txt",
+                },
+              }),
+          },
+        ],
+      },
+      { separator: true, label: "" },
+      { label: "Display settings", action: () => {} },
+      { label: "Personalize", action: () => {} },
+    ];
+
+    // Classic menu for Win98 / XP / 7
+    const classicItems: MenuItem[] = [
       {
         label: "Arrange Icons",
         submenu: [
@@ -78,12 +147,10 @@ export default function Desktop() {
           },
         ],
       },
-      // --- WIRE THIS UP RIGHT HERE ---
       {
         label: "Line up Icons",
         action: () => dispatch({ type: "ALIGN_ICONS_TO_GRID" }),
       },
-      // -------------------------------
       { separator: true, label: "" },
       { label: "Refresh", action: () => window.location.reload() },
       { separator: true, label: "" },
@@ -118,23 +185,11 @@ export default function Desktop() {
                 },
               }),
           },
-          {
-            label: "Bitmap Image",
-            action: () =>
-              dispatch({
-                type: "ADD_ICON",
-                payload: {
-                  id: `bitmap-${Date.now()}`,
-                  x: clickX,
-                  y: clickY,
-                  type: "bitmap",
-                  label: "New Bitmap Image.bmp",
-                },
-              }),
-          },
         ],
       },
     ];
+
+    const items = state.osIndex === 3 ? win10Items : classicItems;
 
     dispatch({
       type: "OPEN_CONTEXT_MENU",
