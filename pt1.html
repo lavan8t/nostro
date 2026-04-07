@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Windows Calculator Evolution</title>
+    <style>
+        body {
+            background-color: #008080;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: "MS Sans Serif", "Tahoma", sans-serif;
+            user-select: none;
+        }
+
+        .calc-container {
+            cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+
+ 
+        .calculator-98 {
+            background-color: #c0c0c0;
+            width: 445px;
+            padding: 2px;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            box-shadow: 1px 1px 0px 0px #000;
+        }
+        .calculator-98 .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            padding: 2px 2px 2px 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 18px;
+        }
+        .calculator-98 .title-text { font-weight: bold; font-size: 11px; display: flex; align-items: center; }
+        .calculator-98 .title-controls { display: flex; }
+        .calculator-98 .title-controls div {
+            width: 16px; height: 14px; background: #c0c0c0; border: 1px solid #ffffff;
+            border-right-color: #808080; border-bottom-color: #808080; color: black;
+            font-size: 9px; display: flex; justify-content: center; align-items: center;
+            margin-left: 2px; font-weight: bold;
+        }
+        .calculator-98 .menu-bar { padding: 2px 6px; font-size: 11px; display: flex; gap: 12px; }
+        .calculator-98 .menu-bar span::first-letter { text-decoration: underline; }
+        .calculator-98 .screen-container { padding: 6px 11px; display: flex; justify-content: flex-end; }
+        .calculator-98 #display-98 {
+            width: 100%; height: 22px; background: #ffffff; border-top: 2px solid #808080;
+            border-left: 2px solid #808080; border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff;
+            padding: 0 4px; font-family: "Courier New", monospace; font-size: 18px;
+            display: flex; align-items: center; justify-content: flex-end; font-weight: bold;
+        }
+        .calculator-98 .modes-outer { padding: 0 10px; display: flex; gap: 6px; margin-bottom: 8px; }
+        .calculator-98 .mode-group {
+            border: 1px solid #808080; border-right-color: #fff; border-bottom-color: #fff;
+            padding: 4px 6px; display: flex; gap: 8px; font-size: 11px;
+        }
+        .calculator-98 .main-layout { padding: 0 10px 10px 10px; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; }
+        .calculator-98 .top-row-controls { grid-column: span 11; display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; margin-bottom: 4px; }
+        .calculator-98 .check-box-area { grid-column: span 3; display: flex; gap: 4px; border: 1px solid #808080; border-right-color: #fff; border-bottom-color: #fff; padding: 2px; }
+        .calculator-98 .empty-well { grid-column: span 1; border: 2px inset #fff; background: #c0c0c0; height: 26px; }
+        .calculator-98 button { height: 26px; width: 100%; background: #c0c0c0; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #808080; border-bottom: 1px solid #808080; font-size: 11px; display: flex; justify-content: center; align-items: center; outline: none; }
+        .calculator-98 button:active { border: 1px inset #fff; padding: 1px 0 0 1px; }
+        .calculator-98 .blue { color: #0000ff; } .calculator-98 .red { color: #ff0000; } .calculator-98 .purple { color: #800080; } .calculator-98 .grey { color: #808080; }
+        .calculator-98 .span-2 { grid-column: span 2; } .calculator-98 .span-3 { grid-column: span 3; }
+        .calculator-98 label { display: flex; align-items: center; font-size: 11px; }
+
+
+        .calculator-xp {
+            background-color: #ece9d8; width: 300px; padding: 3px; border: 3px solid #0055e5; border-radius: 8px 8px 0 0;
+        }
+        .calculator-xp .title-bar {
+            background: linear-gradient(to bottom, #0058e6 0%, #3a91ff 10%, #1159d2 100%);
+            color: white; padding: 4px 8px; border-radius: 5px 5px 0 0; font-size: 12px; display: flex; justify-content: space-between;
+        }
+        .calculator-xp .display-well { background: white; border: 1px solid #7f9db9; margin: 8px; height: 35px; text-align: right; padding: 5px; font-size: 20px; }
+        .calculator-xp .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; }
+        .calculator-xp button { height: 32px; background: #f4f4f4; border: 1px solid #003c74; border-radius: 3px; color: #0000ff; }
+        .calculator-xp button.red { color: red; }
+
+        .calculator-7 {
+            background: linear-gradient(to bottom, #d9e4f1, #c1d1e8); width: 260px; padding: 5px; border: 1px solid #718095; border-radius: 5px;
+        }
+        .calculator-7 .display-well { background: white; border: 1px solid #8e9cad; height: 50px; margin: 5px; font-size: 24px; text-align: right; padding: 10px; border-radius: 3px; }
+        .calculator-7 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 5px; }
+        .calculator-7 button { height: 40px; background: linear-gradient(to bottom, #f2f7fd, #d8e1ef); border: 1px solid #8797aa; border-radius: 4px; font-size: 14px; }
+
+
+        .calculator-10 {
+            background: #f2f2f2; width: 320px; padding: 0; border: 1px solid #ccc; font-family: "Segoe UI", sans-serif;
+        }
+        .calculator-10 .header { padding: 10px; font-size: 20px; font-weight: normal; }
+        .calculator-10 .display-well { font-size: 48px; text-align: right; padding: 20px 15px; }
+        .calculator-10 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #ccc; border-top: 1px solid #ccc; }
+        .calculator-10 button { height: 60px; border: none; background: #fafafa; font-size: 18px; }
+        .calculator-10 button:hover { background: #e6e6e6; }
+        .calculator-10 .equal { background: #0078d7; color: white; }
+    </style>
+</head>
+<body onclick="cycleVersions(event)">
+
+<div class="calc-container">
+    <div id="calc-98" class="calculator-98">
+        <div class="title-bar">
+            <div class="title-text">Calculator</div>
+            <div class="title-controls">
+                <div>_</div><div>□</div><div style="font-family: sans-serif">X</div>
+            </div>
+        </div>
+        <div class="menu-bar"><span>Edit</span><span>View</span><span>Help</span></div>
+        <div class="screen-container"><div id="display-98">0.</div></div>
+        <div class="modes-outer">
+            <div class="mode-group" style="flex: 1.2;"><label><input type="radio" name="b" checked> Hex</label><label><input type="radio" name="b"> Dec</label><label><input type="radio" name="b"> Oct</label><label><input type="radio" name="b"> Bin</label></div>
+            <div class="mode-group" style="flex: 1;"><label><input type="radio" name="a" checked> Degrees</label><label><input type="radio" name="a"> Radians</label><label><input type="radio" name="a"> Gradients</label></div>
+        </div>
+        <div class="main-layout">
+            <div class="top-row-controls">
+                <div class="check-box-area"><label><input type="checkbox"> Inv</label><label><input type="checkbox"> Hyp</label></div>
+                <div class="empty-well"></div><div class="empty-well"></div>
+                <button class="red span-3" onclick="backspace()">Backspace</button>
+                <button class="red span-2" onclick="clearEntry()">CE</button>
+                <button class="red span-2" onclick="clearAll()">C</button>
+            </div>
+            <button class="blue">Sta</button><button class="purple">F-E</button><button class="purple">(</button><button class="purple">)</button><button class="red">MC</button>
+            <button class="blue" onclick="num('7')">7</button><button class="blue" onclick="num('8')">8</button><button class="blue" onclick="num('9')">9</button>
+            <button class="red" onclick="op('/')">/</button><button class="red">Mod</button><button class="red">And</button>
+            <button class="grey">Ave</button><button class="purple">dms</button><button class="purple">Exp</button><button class="purple">ln</button><button class="red">MR</button>
+            <button class="blue" onclick="num('4')">4</button><button class="blue" onclick="num('5')">5</button><button class="blue" onclick="num('6')">6</button>
+            <button class="red" onclick="op('*')">*</button><button class="red">Or</button><button class="red">Xor</button>
+            <button class="grey">Sum</button><button class="purple">sin</button><button class="purple">x^y</button><button class="purple">log</button><button class="red">MS</button>
+            <button class="blue" onclick="num('1')">1</button><button class="blue" onclick="num('2')">2</button><button class="blue" onclick="num('3')">3</button>
+            <button class="red" onclick="op('-')">-</button><button class="red">Lsh</button><button class="red">Not</button>
+            <button class="grey">s</button><button class="purple">cos</button><button class="purple">x^3</button><button class="purple">n!</button><button class="red">M+</button>
+            <button class="blue" onclick="num('0')">0</button><button class="blue">+/-</button><button class="blue">.</button>
+            <button class="red" onclick="op('+')">+</button><button class="red" onclick="calc()">=</button><button class="red">Int</button>
+            <button class="grey">Dat</button><button class="purple">tan</button><button class="purple">x^2</button><button class="purple">1/x</button><button class="blue">pi</button>
+            <button class="grey">A</button><button class="grey">B</button><button class="grey">C</button><button class="grey">D</button><button class="grey">E</button><button class="grey">F</button>
+        </div>
+    </div>
+
+    <div id="calc-xp" class="calculator-xp hidden">
+        <div class="title-bar"><span>Calculator</span><span>X</span></div>
+        <div class="display-well" id="display-xp">0</div>
+        <div class="grid">
+            <button class="red" onclick="clearAll()">C</button><button onclick="num('7')">7</button><button onclick="num('8')">8</button><button onclick="num('9')">9</button><button class="red" onclick="op('/')">/</button>
+            <button class="red" onclick="handleMemory()">MC</button><button onclick="num('4')">4</button><button onclick="num('5')">5</button><button onclick="num('6')">6</button><button class="red" onclick="op('*')">*</button>
+            <button class="red" onclick="handleMemory()">MR</button><button onclick="num('1')">1</button><button onclick="num('2')">2</button><button onclick="num('3')">3</button><button class="red" onclick="op('-')">-</button>
+            <button class="red" onclick="handleMemory()">MS</button><button onclick="num('0')">0</button><button onclick="op('+')">+</button><button class="span-2 red" onclick="calc()">=</button>
+        </div>
+    </div>
+
+    <div id="calc-7" class="calculator-7 hidden">
+        <div class="display-well" id="display-7">0</div>
+        <div class="grid">
+            <button onclick="clearAll()">C</button><button onclick="op('/')">/</button><button onclick="op('*')">*</button><button onclick="op('-')">-</button>
+            <button onclick="num('7')">7</button><button onclick="num('8')">8</button><button onclick="num('9')">9</button><button onclick="op('+')">+</button>
+            <button onclick="num('4')">4</button><button onclick="num('5')">5</button><button onclick="num('6')">6</button><button onclick="calc()" class="span-1">=</button>
+            <button onclick="num('1')">1</button><button onclick="num('2')">2</button><button onclick="num('3')">3</button><button onclick="num('0')" class="span-1">0</button>
+        </div>
+    </div>
+
+    <div id="calc-10" class="calculator-10 hidden">
+        <div class="header">Standard</div>
+        <div class="display-well" id="display-10">0</div>
+        <div class="grid">
+            <button onclick="clearAll()">CE</button><button onclick="clearAll()">C</button><button onclick="backspace()">DEL</button><button onclick="op('/')">÷</button>
+            <button onclick="num('7')">7</button><button onclick="num('8')">8</button><button onclick="num('9')">9</button><button onclick="op('*')">×</button>
+            <button onclick="num('4')">4</button><button onclick="num('5')">5</button><button onclick="num('6')">6</button><button onclick="op('-')">-</button>
+            <button onclick="num('1')">1</button><button onclick="num('2')">2</button><button onclick="num('3')">3</button><button onclick="op('+')">+</button>
+            <button>±</button><button onclick="num('0')">0</button><button>.</button><button class="equal" onclick="calc()">=</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let exp = '';
+    let currentVersion = 0;
+    const versions = ['calc-98', 'calc-xp', 'calc-7', 'calc-10'];
+    const displays = ['display-98', 'display-xp', 'display-7', 'display-10'];
+
+    function cycleVersions(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+        
+        document.getElementById(versions[currentVersion]).classList.add('hidden');
+        currentVersion = (currentVersion + 1) % versions.length;
+        document.getElementById(versions[currentVersion]).classList.remove('hidden');
+        
+        if(currentVersion === 3) document.body.style.backgroundColor = "#ffffff";
+        else document.body.style.backgroundColor = "#008080";
+    }
+
+    function updateAll() {
+        const val = exp || '0';
+        displays.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.innerText = (id === 'display-98' && exp === '') ? '0.' : val;
+        });
+    }
+
+    function num(n) {
+        event.stopPropagation();
+        exp += n;
+        updateAll();
+    }
+
+    function op(o) {
+        event.stopPropagation();
+        exp += o;
+        updateAll();
+    }
+
+    function calc() {
+        event.stopPropagation();
+        try {
+            exp = eval(exp).toString();
+            updateAll();
+        } catch {
+            exp = '';
+            displays.forEach(id => document.getElementById(id).innerText = "Error");
+        }
+    }
+
+    function clearAll() {
+        event.stopPropagation();
+        exp = '';
+        updateAll();
+    }
+
+    function clearEntry() {
+        event.stopPropagation();
+        exp = '';
+        updateAll();
+    }
+
+    function backspace() {
+        event.stopPropagation();
+        exp = exp.slice(0, -1);
+        updateAll();
+    }
+    
+    function handleMemory() { event.stopPropagation(); }
+</script>
+
+</body>
+</html>
