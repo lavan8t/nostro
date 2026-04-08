@@ -1,4 +1,10 @@
-import { FSDir, FSFile, FSNode, OutputLine, createFileSystem } from "./terminalTypes";
+import {
+  FSDir,
+  FSFile,
+  FSNode,
+  OutputLine,
+  createFileSystem,
+} from "./terminalTypes";
 
 let idCounter = 0;
 const nextId = () => ++idCounter;
@@ -34,23 +40,34 @@ function normalizePath(p: string): string {
     .split(/[\\/]+/)
     .filter(Boolean)
     .join("\\");
-  return cleaned ? `${drive.toUpperCase()}:\\${cleaned}` : `${drive.toUpperCase()}:\\`;
+  return cleaned
+    ? `${drive.toUpperCase()}:\\${cleaned}`
+    : `${drive.toUpperCase()}:\\`;
 }
 
 export function getNode(root: FSDir, path: string): FSNode | null {
   const [, ...parts] = path.replace(/\\/g, "/").split("/");
   let cur: FSNode = root;
+
   for (const part of parts) {
     if (!part) continue;
+
+    // 1. Check type as you already were
     if (cur.type !== "dir") return null;
-    const child = cur.children[part];
+
+    // 2. Explicitly cast to FSDir and type the children/child variables
+    // This breaks the circular inference loop for the compiler
+    const currentDir = cur as FSDir;
+    const children: Record<string, FSNode> = currentDir.children;
+    const child: FSNode | undefined = children[part];
+
     if (!child) {
       // case-insensitive fallback
-      const key = Object.keys(cur.children).find(
-        (k) => k.toLowerCase() === part.toLowerCase()
+      const key = Object.keys(children).find(
+        (k) => k.toLowerCase() === part.toLowerCase(),
       );
       if (!key) return null;
-      cur = cur.children[key];
+      cur = children[key];
     } else {
       cur = child;
     }
@@ -86,7 +103,9 @@ function formatDirListing(dir: FSDir, path: string): string[] {
     }
   }
 
-  lines.push(`               ${fileCount} File(s)    ${totalBytes.toLocaleString()} bytes`);
+  lines.push(
+    `               ${fileCount} File(s)    ${totalBytes.toLocaleString()} bytes`,
+  );
   lines.push(`               ${dirCount} Dir(s)     10,737,418,240 bytes free`);
   return lines;
 }
@@ -107,7 +126,7 @@ export function processCommand(
   input: string,
   cwd: string,
   root: FSDir,
-  version: "win98" | "winxp" | "win7" | "win10"
+  version: "win98" | "winxp" | "win7" | "win10",
 ): CommandResult {
   const trimmed = input.trim();
   if (!trimmed) return { lines: [] };
@@ -133,7 +152,7 @@ export function processCommand(
       const verStrings: Record<string, string> = {
         win98: "Microsoft Windows 98 [Version 4.10.1998]",
         winxp: "Microsoft Windows XP [Version 5.1.2600]",
-        win7:  "Microsoft Windows [Version 6.1.7601]",
+        win7: "Microsoft Windows [Version 6.1.7601]",
         win10: "Microsoft Windows [Version 10.0.19045.3693]",
       };
       out("");
@@ -191,7 +210,11 @@ export function processCommand(
 
     // ── echo ──────────────────────────────────────────────────────────────
     case "echo": {
-      if (!args || args.toLowerCase() === "on" || args.toLowerCase() === "off") {
+      if (
+        !args ||
+        args.toLowerCase() === "on" ||
+        args.toLowerCase() === "off"
+      ) {
         out(`ECHO is ${args.toLowerCase() === "off" ? "off" : "on"}.`);
       } else {
         out(args);
@@ -223,7 +246,9 @@ export function processCommand(
     // ── date ──────────────────────────────────────────────────────────────
     case "date": {
       const now = new Date();
-      out(`The current date is: ${now.toLocaleDateString("en-US", { weekday: "short", month: "2-digit", day: "2-digit", year: "numeric" })}`);
+      out(
+        `The current date is: ${now.toLocaleDateString("en-US", { weekday: "short", month: "2-digit", day: "2-digit", year: "numeric" })}`,
+      );
       out(`Enter the new date: (mm-dd-yy)`);
       break;
     }
@@ -231,7 +256,9 @@ export function processCommand(
     // ── time ──────────────────────────────────────────────────────────────
     case "time": {
       const now = new Date();
-      out(`The current time is: ${now.toLocaleTimeString("en-US", { hour12: false })}`);
+      out(
+        `The current time is: ${now.toLocaleTimeString("en-US", { hour12: false })}`,
+      );
       break;
     }
 
@@ -243,10 +270,22 @@ export function processCommand(
     // ── color ────────────────────────────────────────────────────────────
     case "color": {
       const CMD_PALETTE: Record<string, string> = {
-        "0": "#000000", "1": "#000080", "2": "#008000", "3": "#008080",
-        "4": "#800000", "5": "#800080", "6": "#808000", "7": "#c0c0c0",
-        "8": "#808080", "9": "#0000ff", "a": "#00ff00", "b": "#00ffff",
-        "c": "#ff0000", "d": "#ff00ff", "e": "#ffff00", "f": "#ffffff",
+        "0": "#000000",
+        "1": "#000080",
+        "2": "#008000",
+        "3": "#008080",
+        "4": "#800000",
+        "5": "#800080",
+        "6": "#808000",
+        "7": "#c0c0c0",
+        "8": "#808080",
+        "9": "#0000ff",
+        a: "#00ff00",
+        b: "#00ffff",
+        c: "#ff0000",
+        d: "#ff00ff",
+        e: "#ffff00",
+        f: "#ffffff",
       };
       if (!args) {
         // Reset to theme defaults
@@ -261,7 +300,10 @@ export function processCommand(
         err(`The specified color combination is invalid.`);
         break;
       }
-      return { lines: [], newColors: { bg: CMD_PALETTE[code[0]], fg: CMD_PALETTE[code[1]] } };
+      return {
+        lines: [],
+        newColors: { bg: CMD_PALETTE[code[0]], fg: CMD_PALETTE[code[1]] },
+      };
     }
 
     // ── mkdir / md ────────────────────────────────────────────────────────
@@ -276,7 +318,11 @@ export function processCommand(
       if (parentNode?.type === "dir") {
         (parentNode as FSDir).children[args] = {
           type: "dir",
-          date: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }),
+          date: new Date().toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+          }),
           children: {},
         };
       }
@@ -287,19 +333,19 @@ export function processCommand(
     case "help":
     case "/?": {
       const cmds = [
-        ["CLS",   "Clears the screen."],
-        ["CD",    "Displays or changes the current directory."],
-        ["DIR",   "Displays a list of files and directories."],
-        ["ECHO",  "Displays messages or turns echo on/off."],
-        ["TYPE",  "Displays the contents of a text file."],
+        ["CLS", "Clears the screen."],
+        ["CD", "Displays or changes the current directory."],
+        ["DIR", "Displays a list of files and directories."],
+        ["ECHO", "Displays messages or turns echo on/off."],
+        ["TYPE", "Displays the contents of a text file."],
         ["MKDIR", "Creates a directory."],
-        ["VER",   "Displays the Windows version."],
-        ["DATE",  "Displays or sets the date."],
-        ["TIME",  "Displays or sets the time."],
+        ["VER", "Displays the Windows version."],
+        ["DATE", "Displays or sets the date."],
+        ["TIME", "Displays or sets the time."],
         ["TITLE", "Sets the window title."],
         ["COLOR", "Sets console colors."],
-        ["HELP",  "Provides help information."],
-        ["EXIT",  "Quits the command interpreter."],
+        ["HELP", "Provides help information."],
+        ["EXIT", "Quits the command interpreter."],
       ];
       out("For more information on a specific command, type HELP command-name");
       out("");
@@ -325,17 +371,25 @@ export function processCommand(
           out("");
           out(`Mode                 LastWriteTime         Length Name`);
           out(`----                 -------------         ------ ----`);
-          for (const [name, child] of Object.entries((node as FSDir).children)) {
+          for (const [name, child] of Object.entries(
+            (node as FSDir).children,
+          )) {
             if (child.type === "dir") {
-              out(`d----         ${child.date}  12:00 AM                ${name}`);
+              out(
+                `d----         ${child.date}  12:00 AM                ${name}`,
+              );
             } else {
-              out(`-a---         ${child.date}  12:00 AM          ${String((child as FSFile).size).padStart(6)} ${name}`);
+              out(
+                `-a---         ${child.date}  12:00 AM          ${String((child as FSFile).size).padStart(6)} ${name}`,
+              );
             }
           }
           out("");
         }
       } else {
-        err(`'${rawCmd}' is not recognized as an internal or external command.`);
+        err(
+          `'${rawCmd}' is not recognized as an internal or external command.`,
+        );
       }
       break;
     }
@@ -349,7 +403,9 @@ export function processCommand(
         out(cwd);
         out("");
       } else {
-        err(`'${rawCmd}' is not recognized as an internal or external command.`);
+        err(
+          `'${rawCmd}' is not recognized as an internal or external command.`,
+        );
       }
       break;
     }
@@ -362,10 +418,16 @@ export function processCommand(
     // ── unknown ───────────────────────────────────────────────────────────
     default: {
       if (version === "win10") {
-        err(`'${rawCmd}' is not recognized as the name of a cmdlet, function, script file, or operable program.`);
-        err(`Check the spelling of the name, or if a path was included, verify that the path is correct and try again.`);
+        err(
+          `'${rawCmd}' is not recognized as the name of a cmdlet, function, script file, or operable program.`,
+        );
+        err(
+          `Check the spelling of the name, or if a path was included, verify that the path is correct and try again.`,
+        );
       } else {
-        err(`'${rawCmd}' is not recognized as an internal or external command,`);
+        err(
+          `'${rawCmd}' is not recognized as an internal or external command,`,
+        );
         err(`operable program or batch file.`);
       }
       break;
