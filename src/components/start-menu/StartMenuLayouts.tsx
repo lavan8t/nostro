@@ -10,10 +10,12 @@ type LaunchFn = (id: string) => void;
 function Win7AppRow({
   name,
   color,
+  icon,
   onClick,
 }: {
   name: string;
-  color: string;
+  color?: string;
+  icon?: string;
   onClick?: () => void;
 }) {
   return (
@@ -21,12 +23,16 @@ function Win7AppRow({
       onClick={onClick}
       className="flex items-center gap-2 p-1 px-2 hover:bg-sky-100 hover:shadow-[inset_0_0_0_1px_rgba(100,180,255,0.5)] w-full text-left rounded-sm transition-colors group"
     >
-      <div
-        className="w-7 h-7 flex items-center justify-center rounded-sm shadow-sm"
-        style={{ backgroundColor: color }}
-      >
-        <div className="w-3 h-3 bg-white/30" />
-      </div>
+      {icon ? (
+        <img src={icon} alt={name} className="w-7 h-7 object-contain drop-shadow-sm" />
+      ) : (
+        <div
+          className="w-7 h-7 flex items-center justify-center rounded-sm shadow-sm"
+          style={{ backgroundColor: color || "#ccc" }}
+        >
+          <div className="w-3 h-3 bg-white/30" />
+        </div>
+      )}
       <span className="text-xs text-gray-800 font-medium">{name}</span>
     </button>
   );
@@ -127,33 +133,50 @@ export const Win7StartMenu = ({
         <div className="flex-1 bg-white m-[2px] mr-0 rounded-tl-[4px] rounded-bl-[4px] flex flex-col border border-r-0 border-[rgba(0,0,0,0.3)]">
           <div className="flex-1 p-2 overflow-y-auto space-y-1">
             <Win7AppRow
-              name="Getting Started"
-              color="#2b5797"
-              onClick={() => handleLaunch("wnd-intro")}
+              name="Windows Media Center"
+              icon="/assets/win7/icons/windows_media_center.ico"
             />
-            <Win7AppRow name="Windows Media Center" color="#00cc6a" />
-            <Win7AppRow name="Calculator" color="#333" />
-            <Win7AppRow name="Sticky Notes" color="#e8bc3b" />
-            <Win7AppRow name="Snipping Tool" color="#d13438" />
+            <Win7AppRow
+              name="Calculator"
+              icon="/assets/win7/icons/calculator.ico"
+            />
+            <Win7AppRow
+              name="Sticky Notes"
+              icon="/assets/win7/icons/stickynotes.ico"
+            />
+            <Win7AppRow
+              name="Snipping Tool"
+              icon="/assets/win7/icons/snipping_tool.ico"
+            />
             <Win7AppRow
               name="Paint"
-              color="orange"
+              icon="/assets/win7/icons/paint.ico"
               onClick={() => handleLaunch("wnd-paint")}
             />
-            <Win7AppRow name="Remote Desktop Connection" color="#2b5797" />
-            <Win7AppRow name="Magnifier" color="#881798" />
-            <Win7AppRow name="Solitaire" color="green" />
+            <Win7AppRow
+              name="Audio Player"
+              icon="/assets/win7/icons/media.ico"
+              onClick={() => handleLaunch("wnd-media")}
+            />
+            <Win7AppRow
+              name="Remote Desktop Connection"
+              icon="/assets/win7/icons/remote_desktop_connection.ico"
+            />
+            <Win7AppRow
+              name="Magnifier"
+              icon="/assets/win7/icons/magnifier.ico"
+            />
+            <Win7AppRow
+              name="Solitaire"
+              icon="/assets/win7/icons/solitaire.ico"
+            />
             <div className="h-4" />
             <Win7AppRow
               name="Notepad"
-              color="#444"
+              icon="/assets/win7/icons/notepad.ico"
               onClick={() => handleLaunch("wnd-notepad")}
             />
-            <Win7AppRow
-              name="Terminal"
-              color="#000000"
-              onClick={() => handleLaunch("wnd-terminal")}
-            />
+
           </div>
           <div className="p-3 pb-3">
             <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-2" />
@@ -179,21 +202,22 @@ export const Win7StartMenu = ({
           className="w-[160px] text-white py-2 px-1 flex flex-col text-sm relative"
           style={{ textShadow: "0 0 5px rgba(0,0,0,0.9)" }}
         >
-          <div className="absolute top-[-25px] right-[25px] w-[50px] h-[50px] bg-orange-200 rounded-md border border-[rgba(0,0,0,0.5)] shadow-[0_2px_5px_rgba(0,0,0,0.5)] overflow-hidden flex items-center justify-center z-10">
-            <div className="opacity-80">
-              <Icons.User />
+          <div className="flex justify-center mt-2 mb-4">
+            <div className="w-[60px] h-[60px] bg-white rounded-md border border-[rgba(0,0,0,0.5)] shadow-[inset_0_1px_3px_rgba(0,0,0,0.3),0_2px_5px_rgba(0,0,0,0.5)] p-[2px] flex items-center justify-center relative z-10">
+              <img 
+                src="/assets/win7/flower.png" 
+                alt="User" 
+                className="w-full h-full object-cover rounded-sm relative z-10"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none z-20 rounded-md" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
           </div>
-          <div className="h-[30px]" />
-          <div className="space-y-1 mt-1">
+          <div className="space-y-1">
             <Win7LinkRow label="Tiffany" bold />
-            <Win7LinkRow label="Documents" />
-            <Win7LinkRow label="Pictures" />
             <Win7LinkRow label="Music" />
             <div className="h-[1px] bg-white/10 my-1 mx-3" />
             <Win7LinkRow label="Games" />
-            <Win7LinkRow label="Computer" />
+            <Win7LinkRow label="My Computer" />
             <div className="h-[1px] bg-white/10 my-1 mx-3" />
             <Win7LinkRow label="Control Panel" />
             <Win7LinkRow label="Devices and Printers" />
@@ -281,6 +305,14 @@ export const Win10StartMenu = ({
               <Win10AppRow
                 name="Google Chrome"
                 onClick={() => handleLaunch("wnd-browser")}
+              />
+              <Win10AppRow
+                name="Paint"
+                onClick={() => handleLaunch("wnd-paint")}
+              />
+              <Win10AppRow
+                name="Audio Player"
+                onClick={() => handleLaunch("wnd-media")}
               />
               <Win10AppRow
                 name="Visual Studio Code"
@@ -470,6 +502,15 @@ export const WinXPStartMenu = ({
                 Paint
               </span>
             </button>
+            <button
+              onClick={() => handleLaunch("wnd-media")}
+              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+            >
+              <Icons.App color="#00cc6a" />
+              <span className="text-sm text-gray-800 hover:text-white">
+                Audio Player
+              </span>
+            </button>
           </div>
           <div className="mt-auto px-4 py-2 text-center">
             <button className="bg-white font-bold text-gray-700 text-sm hover:underline">
@@ -606,6 +647,11 @@ export const WinClassicStartMenu = ({
             label="Paint"
             icon={<Icons.App color="orange" />}
             onClick={() => handleLaunch("wnd-paint")}
+          />
+          <MenuItem
+            label="Audio Player"
+            icon={<Icons.App color="#00cc6a" />}
+            onClick={() => handleLaunch("wnd-media")}
           />
           <MenuItem
             label="MS-DOS Prompt"

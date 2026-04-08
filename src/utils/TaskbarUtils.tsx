@@ -2,28 +2,45 @@ import React from "react";
 import { Icons } from "../components/Icons";
 
 export const getProgramId = (id: string): string => {
+  const lowerId = id.toLowerCase();
+  if (lowerId.includes("paint") || lowerId.includes("bitmap")) return "Paint";
+  if (lowerId.includes("terminal") || lowerId.includes("cmd") || lowerId.includes("powershell")) return "Terminal";
+  if (lowerId.includes("media") || lowerId.includes("audio")) return "Media Player";
+  if (lowerId.includes("browser") || lowerId.includes("chrome") || lowerId.includes("web")) return "Browser";
+  if (lowerId.includes("notepad") || lowerId.includes("editor") || lowerId.includes("text")) return "Notepad";
+  if (lowerId.includes("explorer") || lowerId.includes("folder")) return "Explorer";
+  if (lowerId.includes("code")) return "VS Code";
+  if (lowerId.includes("calendar")) return "Calendar";
+
   const parts = id.split("-");
-  if (parts.length >= 2) return parts[1].toLowerCase();
-  return "default";
+  if (parts[0] === "wnd" && parts.length >= 2) return parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+  return parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : "App";
 };
 
-export const getProgramIcon = (programId: string) => {
-  if (programId.includes("terminal") || programId.includes("cmd"))
+export const getProgramIcon = (programId: string, osIndex: number = 3) => {
+  const id = programId.toLowerCase();
+  const osDir = ["win98", "winxp", "win7", "win10"][osIndex] || "win10";
+
+  if (id.includes("terminal") || id.includes("cmd")) {
+    if (osIndex < 3) return <img src={`/assets/${osDir}/icons/command_prompt.ico`} className="w-full h-full object-contain drop-shadow-sm" alt="Terminal" />;
     return <Icons.Terminal />;
-  if (
-    programId.includes("browser") ||
-    programId.includes("chrome") ||
-    programId.includes("web")
-  )
+  }
+  if (id.includes("browser") || id.includes("chrome") || id.includes("web"))
     return <Icons.Browser />;
-  if (
-    programId.includes("notepad") ||
-    programId.includes("editor") ||
-    programId.includes("text")
-  )
+  if (id.includes("notepad") || id.includes("editor") || id.includes("text")) {
+    if (osIndex < 3) return <img src={`/assets/${osDir}/icons/${osIndex === 2 ? 'notepad.ico' : 'text.ico'}`} className="w-full h-full object-contain drop-shadow-sm" alt="Notepad" />;
     return <Icons.Notepad />;
-  if (programId.includes("paint") || programId.includes("draw"))
+  }
+  if (id.includes("paint") || id.includes("draw") || id.includes("bitmap")) {
+    if (osIndex < 3) return <img src={`/assets/${osDir}/icons/paint.ico`} className="w-full h-full object-contain drop-shadow-sm" alt="Paint" />;
     return <Icons.Paint />;
+  }
+  if (id.includes("media") || id.includes("audio"))
+    return <img src={`/assets/${osDir}/icons/media.ico`} className="w-full h-full object-contain drop-shadow-sm" alt="Media Player" />;
+  if (id.includes("explorer") || id.includes("folder") || id.includes("computer")) {
+    if (osIndex < 3) return <img src={`/assets/${osDir}/icons/computer.ico`} className="w-full h-full object-contain drop-shadow-sm" alt="Explorer" />;
+    return <Icons.Default />;
+  }
   return <Icons.Default />;
 };
 

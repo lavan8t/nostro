@@ -61,12 +61,12 @@ export default function DesktopIcon({
   let label = icon.label || "Icon";
   if (iconType === "computer")
     label =
-      osIndex <= 1 ? "My Computer" : osIndex === 2 ? "Computer" : "This PC";
+      osIndex <= 2 ? "My Computer" : "This PC";
   if (iconType === "recycle")
     label = "Recycle Bin";
 
   // --- Grid & Positioning ---
-  const GRID_SIZE_X = 75;
+  const GRID_SIZE_X = 90;
   const GRID_SIZE_Y = 100;
   let targetX = icon.x;
   let targetY = icon.y;
@@ -116,6 +116,10 @@ export default function DesktopIcon({
         return "controlpanel.ico";
       case "terminal":
         return "command_prompt.ico";
+      case "media":
+        return "media.ico";
+      case "paint":
+        return "paint.ico";
       default:
         return "default.png";
     }
@@ -340,7 +344,7 @@ export default function DesktopIcon({
   return (
     <div
       ref={nodeRef}
-      className="absolute flex flex-col items-center justify-start p-1 w-17.5 select-none group"
+      className="absolute flex flex-col items-center justify-start p-1 w-[90px] select-none group"
       style={{
         left: pos.x,
         top: pos.y,

@@ -427,8 +427,8 @@ export default function WindowFrame({
                 flex: 1,
                 overflow: "hidden",
                 display: "flex",
-                alignItems: "center",
-                padding: "3px 2px",
+                alignItems: "stretch",
+                padding: "0",
                 minHeight: "18px",
                 color: "#1a1a1a",
                 fontFamily: "'Segoe UI', Tahoma, sans-serif",
@@ -443,6 +443,7 @@ export default function WindowFrame({
               <div
                 style={{
                   flex: 1,
+                  width: "100%",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",

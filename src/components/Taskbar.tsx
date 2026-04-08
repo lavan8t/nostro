@@ -273,7 +273,7 @@ export default function Taskbar() {
                 style={getTaskbarButtonStyle(state.osIndex, isActive)}
               >
                 <div className="w-4 h-4 shrink-0 text-current">
-                  {getProgramIcon(programId)}
+                  {getProgramIcon(programId, state.osIndex)}
                 </div>
                 {state.osIndex <= 1 && (
                   <span
