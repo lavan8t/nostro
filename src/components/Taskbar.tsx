@@ -14,7 +14,10 @@ export default function Taskbar() {
   const { state, dispatch } = useAppContext();
   const [showCalendar, setShowCalendar] = useState(false);
   const startButtonRef = useRef<HTMLButtonElement>(null);
+  
   const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
+  
   const scrollAccumulator = useRef(0);
   const lastSwitchTime = useRef(0);
   const localOsIndex = useRef(state.osIndex);
@@ -24,13 +27,16 @@ export default function Taskbar() {
   }, [state.osIndex]);
 
   useEffect(() => {
-    const updateTime = () =>
+    const updateTime = () => {
+      const now = new Date();
       setTime(
-        new Date().toLocaleTimeString([], {
+        now.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       );
+      setDate(now.toLocaleDateString());
+    };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
@@ -118,7 +124,7 @@ export default function Taskbar() {
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
-    if (state.osIndex !== 3) return; // Only for Windows 10
+    if (state.osIndex !== 3) return; 
     
     e.preventDefault();
     e.stopPropagation();
@@ -177,7 +183,7 @@ export default function Taskbar() {
               ? "inset 1px 1px 0 0 var(--ButtonShadow)"
               : "inset -1px -1px 0 var(--ButtonShadow), inset 1px 1px 0 var(--ButtonFace)",
             color: "var(--ButtonText)",
-            fontSize: "13px", // Bumped Up
+            fontSize: "13px",
             fontFamily: "var(--os-font)",
             minWidth: "60px",
           }}
@@ -213,12 +219,18 @@ export default function Taskbar() {
         <button
           ref={startButtonRef}
           onClick={() => dispatch({ type: "TOGGLE_START_MENU" })}
-          className="h-full flex items-center justify-center pl-2 pr-1 hover:brightness-110 transition-transform duration-200"
+          className={`relative h-full flex items-center justify-center pl-2 pr-1 transition-transform duration-200`}
         >
           <img
             src={iconPath}
             alt="Start"
-            className={isWin7 ? "w-8 h-8 scale-110" : "w-8 h-8 p-1"}
+            // For Win 7: increase size to w-11 h-11 and move it up 12% so it breaks the top border
+            className={
+              isWin7 
+                ? "w-11 h-11 object-contain drop-shadow-md hover:brightness-110" 
+                : "w-8 h-8 p-1 hover:brightness-110"
+            }
+            style={isWin7 ? { transform: "translateY(-12%)" } : {}}
           />
         </button>
       );
@@ -226,10 +238,49 @@ export default function Taskbar() {
     return null;
   };
 
-  const taskbarHeight =
-    state.osIndex === 0 || state.osIndex === 1 ? "30px" : "40px";
+  const getClockStyle = (osIndex: number): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
+      minWidth: "80px",
+      justifyContent: "center",
+      fontFamily: "var(--os-font)",
+      padding: "0 10px", 
+    };
 
-  const taskbarStyle: React.CSSProperties = {
+    if (osIndex === 0) { 
+      return {
+        ...baseStyle,
+        borderTop: "1px solid var(--ButtonShadow)",
+        borderLeft: "1px solid var(--ButtonShadow)",
+        borderRight: "1px solid var(--ButtonHilight)",
+        borderBottom: "1px solid var(--ButtonHilight)",
+        boxShadow: "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)",
+        backgroundColor: "var(--ButtonFace)",
+        color: "var(--ButtonText)",
+      };
+    }
+
+    if (osIndex === 1) { 
+      return {
+        ...baseStyle,
+        background: "linear-gradient(to bottom, #0c59cb 0%, #139ee9 15%, #18b5f2 40%, #139ce6 80%, #095bc9 100%)",
+        borderLeft: "1px solid #1042af", 
+        boxShadow: "inset 1px 0 0 #3fb0f6", 
+        color: "white",
+      };
+    }
+
+    return {
+      ...baseStyle,
+      color: "white",
+    };
+  };
+
+  // UPDATED: Windows 7 taskbar is now 36px (slightly slimmer), Win 10 is 40px, classic/XP is 30px
+  let taskbarHeight = "40px";
+  if (state.osIndex === 0 || state.osIndex === 1) taskbarHeight = "30px";
+  if (state.osIndex === 2) taskbarHeight = "36px";
+
+  let taskbarStyle: React.CSSProperties = {
     height: taskbarHeight,
     background: "var(--os-taskbar-bg)",
     borderTop: state.osIndex === 0 ? "1px solid var(--ButtonHilight)" : "none",
@@ -242,9 +293,20 @@ export default function Taskbar() {
     fontFamily: "var(--os-font)",
   };
 
+  if (state.osIndex === 2) {
+    taskbarStyle = {
+      ...taskbarStyle,
+      background: "radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.25) 0%, rgba(20, 30, 50, 0.4) 100%)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)", 
+      borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+      boxShadow: "0 -2px 10px rgba(0,0,0,0.2)",
+    };
+  }
+
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 flex items-center select-none z-9999 transition-all duration-500 ease-in-out"
+      className="fixed bottom-0 left-0 right-0 flex items-center select-none z-[9999] transition-all duration-500 ease-in-out"
       style={taskbarStyle}
       onContextMenu={handleContextMenu}
     >
@@ -288,55 +350,55 @@ export default function Taskbar() {
         </div>
       </div>
 
-      {/* Clock and Calendar Container */}
       <div className="relative flex items-center h-full ml-auto">
         
-        {/* Calendar Popup */}
         {showCalendar && (
           <div className="absolute bottom-full right-0 mb-1 w-64 shadow-xl z-50">
             <Calendar winId="sys-calendar" />
           </div>
         )}
 
-        {/* Clickable Clock Area */}
         <div
           onClick={() => setShowCalendar(!showCalendar)}
-          className={`flex items-center px-2 h-full cursor-pointer hover:bg-black/5 transition-all duration-500 ${state.osIndex === 0 ? "border-l border-gray-400 inset-shadow" : ""}`}
+          className={`flex items-center h-full cursor-pointer transition-all duration-300 ${state.osIndex > 0 ? "hover:brightness-110" : "hover:bg-black/5"}`}
           onWheel={handleScroll}
           title="Click to toggle Calendar | Scroll to switch OS"
-          style={
-            state.osIndex === 0
-              ? {
-                  borderTop: "1px solid var(--ButtonShadow)",
-                  borderLeft: "1px solid var(--ButtonShadow)",
-                  borderRight: "1px solid var(--ButtonHilight)",
-                  borderBottom: "1px solid var(--ButtonHilight)",
-                  boxShadow:
-                    "inset 1px 1px 0 var(--ButtonDkShadow), inset -1px -1px 0 var(--ButtonLight)",
-                  backgroundColor: "var(--ButtonFace)",
-                  minWidth: "80px",
-                  justifyContent: "center",
-                }
-              : {
-                  minWidth: "80px",
-                  justifyContent: "center",
-                  color: "white",
-                }
-          }
+          style={getClockStyle(state.osIndex)}
         >
-          <span
-            className={
-              state.osIndex === 0
-                ? "text-[13px] font-normal"
-                : "text-xs font-normal"
-            }
-            style={{ fontFamily: "var(--os-font)" }}
-          >
-            {time}
-          </span>
+          {state.osIndex === 2 || state.osIndex === 3 ? (
+            <div className="flex flex-col items-center justify-center leading-tight">
+              <span className="text-[11px] font-normal tracking-wide">{time}</span>
+              <span className="text-[11px] font-normal tracking-wide">{date}</span>
+            </div>
+          ) : (
+            <span
+              className={
+                state.osIndex === 0
+                  ? "text-[13px] font-normal"
+                  : "text-xs font-normal"
+              }
+            >
+              {time}
+            </span>
+          )}
         </div>
+
+        {(state.osIndex === 2 || state.osIndex === 3) && (
+          <div
+            className={`h-full cursor-pointer transition-colors ${
+              state.osIndex === 2 
+                ? "w-[15px] border-l border-white/40 hover:bg-white/30" 
+                : "w-[5px] border-l border-gray-600 hover:bg-white/20"    
+            }`}
+            title="Show desktop"
+            onClick={() => state.windows.forEach(w => dispatch({ type: "MINIMIZE_WINDOW", payload: w.id }))}
+            style={state.osIndex === 2 ? {
+              background: "linear-gradient(to right, rgba(0,0,0,0.05), rgba(255,255,255,0.05))",
+              boxShadow: "inset 1px 0 0 rgba(0,0,0,0.4), inset -1px 0 0 rgba(255,255,255,0.2)",
+            } : {}}
+          />
+        )}
       </div>
     </div>
   );
 }
-

@@ -325,7 +325,7 @@ export default function DesktopIcon({
       payload: { x: e.clientX, y: e.clientY, items },
     });
   };
-
+  
   // --- Click Outside to Deselect / Commit Rename ---
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -339,9 +339,10 @@ export default function DesktopIcon({
   }, [isRenaming, renameValue]);
 
   // --- Styles ---
-  const textStyle: React.CSSProperties = isClassic
-    ? { color: "white" }
-    : { color: "white", textShadow: "1px 1px 2px rgba(0,0,0,0.8)" };
+  const textStyle: React.CSSProperties = {
+    color: "white",
+    textShadow: osIndex === 0 ? "none" : "1px 1px 2px rgba(0,0,0,0.8)",
+  };
 
   return (
     <div
