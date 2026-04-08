@@ -435,13 +435,11 @@ export const WinXPStartMenu = ({
         }}
       >
         <div className="w-10 h-10 rounded-sm bg-blue-100 border-2 border-white/40 overflow-hidden shadow-sm relative flex items-center justify-center">
-          <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-8 h-8 text-orange-400"
-          >
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
+          <img
+            src="/assets/winxp/icons/user.ico"
+            alt="User"
+            className="w-full h-full object-cover"
+          />
         </div>
         <span className="text-white font-bold text-lg drop-shadow-md">
           Administrator
@@ -648,41 +646,46 @@ export const WinClassicStartMenu = ({
         <div className="flex-1 flex flex-col">
           <MenuItem
             label="Programs"
-            icon={<Icons.App color="gold" />}
+            icon={<img src="/assets/win98/icons/folder.ico" alt="Programs" className="w-8 h-8 object-contain" />}
+            hasSubmenu
+          />
+          <MenuItem
+            label="Favorites"
+            icon={<img src="/assets/win98/icons/favorite.ico" alt="Favorites" className="w-8 h-8 object-contain" />}
             hasSubmenu
           />
           <MenuItem
             label="Documents"
-            icon={<Icons.App color="gold" />}
+            icon={<img src="/assets/win98/icons/document.ico" alt="Documents" className="w-8 h-8 object-contain" />}
             hasSubmenu
           />
-          <MenuItem label="Settings" icon={<Icons.Settings />} hasSubmenu />
-          <MenuItem label="Find" icon={<Icons.App color="blue" />} />
-          <MenuItem label="Help" icon={<Icons.Settings />} />
-          <MenuItem label="Run..." icon={<Icons.App color="blue" />} />
+          <MenuItem label="Settings" icon={<img src="/assets/win98/icons/settings.ico" alt="Settings" className="w-8 h-8 object-contain" />} hasSubmenu />
+          <MenuItem label="Find" icon={<img src="/assets/win98/icons/find.ico" alt="Find" className="w-8 h-8 object-contain" />} />
+          <MenuItem label="Help" icon={<img src="/assets/winxp/icons/help.ico" alt="Help" className="w-8 h-8 object-contain" />} />
+          <MenuItem label="Run..." icon={<img src="/assets/winxp/icons/run.ico" alt="Run" className="w-8 h-8 object-contain" />} />
           <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
           <MenuItem
             label="Notepad"
-            icon={<Icons.App />}
+            icon={<img src="/assets/win98/icons/notepad.ico" alt="Notepad" className="w-8 h-8 object-contain" />}
             onClick={() => handleLaunch("wnd-notepad")}
           />
           <MenuItem
             label="Paint"
-            icon={<Icons.App color="orange" />}
+            icon={<img src="/assets/win98/icons/paint.ico" alt="Paint" className="w-8 h-8 object-contain" />}
             onClick={() => handleLaunch("wnd-paint")}
           />
           <MenuItem
-            label="Audio Player"
-            icon={<Icons.App color="#00cc6a" />}
+            label="Media Player"
+            icon={<img src="/assets/win98/icons/media.ico" alt="Audio Player" className="w-8 h-8 object-contain" />}
             onClick={() => handleLaunch("wnd-media")}
           />
           <MenuItem
             label="MS-DOS Prompt"
-            icon={<Icons.App color="#000080" />}
+            icon={<img src="/assets/win98/icons/command_prompt.ico" alt="MS-DOS Prompt" className="w-8 h-8 object-contain" />}
             onClick={() => handleLaunch("wnd-terminal")}
           />
           <div className="border-t border-[var(--ButtonShadow)] border-b border-[var(--ButtonHilight)] my-1" />
-          <MenuItem label="Shut Down..." icon={<Icons.Power />} onClick={handleLogout} />
+          <MenuItem label="Shut Down..." icon={<img src="/assets/win98/icons/shutdown.ico" alt="Shut Down" className="w-8 h-8 object-contain" />} onClick={handleLogout} />
         </div>
         </div>
       </div>

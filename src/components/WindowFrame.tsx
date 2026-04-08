@@ -30,6 +30,7 @@ type SnapType =
 const getWindowTitle = (id: string, osIndex?: number) => {
   if (id.includes("notepad")) return "Untitled - Notepad";
   if (id.includes("paint")) return "Untitled - Paint";
+  if (id.includes("media")) return "Media Player";
   if (id.includes("terminal") || id.includes("cmd") || id.includes("powershell")) {
     if (osIndex === 0) return "MS-DOS Prompt";
     if (osIndex === 1) return "C:\\WINDOWS\\system32\\cmd.exe";
@@ -40,6 +41,23 @@ const getWindowTitle = (id: string, osIndex?: number) => {
     return "Internet Explorer";
   if (id.includes("explorer")) return "Computer";
   return "Application";
+};
+
+// NEW HELPER: Dynamically fetches the right icon based on the active OS
+const getWindowIcon = (id: string, osIndex: number) => {
+  let folder = "win10";
+  if (osIndex === 0) folder = "win98";
+  if (osIndex === 1) folder = "winxp";
+  if (osIndex === 2) folder = "win7";
+
+  if (id.includes("notepad")) return `/assets/${folder}/icons/notepad.ico`;
+  if (id.includes("paint")) return `/assets/${folder}/icons/paint.ico`;
+  if (id.includes("media")) return `/assets/${folder}/icons/media.ico`;
+  if (id.includes("terminal") || id.includes("cmd")) return `/assets/${folder}/icons/command_prompt.ico`;
+  if (id.includes("explorer")) return `/assets/${folder}/icons/computer.ico`;
+  if (id.includes("browser") || id.includes("internet")) return `/assets/${folder}/icons/internet.ico`;
+  
+  return null;
 };
 
 function XPButton({
@@ -166,6 +184,7 @@ export default function WindowFrame({
   const isClassic = state.osIndex === 0;
 
   const windowTitle = win.title ?? getWindowTitle(win.id, state.osIndex);
+  const iconPath = getWindowIcon(win.id, state.osIndex);
 
   useEffect(() => {
     setAnimState("entering");
@@ -402,6 +421,9 @@ export default function WindowFrame({
             }}
           >
             <div className="title-bar" onDoubleClick={handleMaximizeToggle}>
+              {iconPath && (
+                <img src={iconPath} alt="" style={{ width: 16, height: 16, marginRight: 4 }} />
+              )}
               <div className="title-bar-text">{windowTitle}</div>
               <div className="title-bar-controls">
                 <button
@@ -524,7 +546,11 @@ export default function WindowFrame({
                 filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
               }}
             >
-              <Icons.App />
+              {iconPath ? (
+                <img src={iconPath} alt="" className="w-full h-full object-contain" />
+              ) : (
+                <Icons.App />
+              )}
             </div>
             <div
               style={{
@@ -610,7 +636,11 @@ export default function WindowFrame({
           onDoubleClick={handleMaximizeToggle}
         >
           <div className="w-4 h-4 mr-0.75 flex items-center justify-center">
-            <div className="w-3 h-3 bg-white/30" />
+            {iconPath ? (
+              <img src={iconPath} alt="" className="w-full h-full object-contain" />
+            ) : (
+              <div className="w-3 h-3 bg-white/30" />
+            )}
           </div>
           <span className="flex-1 truncate pt-px">{windowTitle}</span>
           <div className="flex gap-0.5 ml-0.5">

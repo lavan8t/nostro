@@ -64,6 +64,8 @@ export default function DesktopIcon({
       osIndex <= 2 ? "My Computer" : "This PC";
   if (iconType === "recycle")
     label = "Recycle Bin";
+  if (iconType === "terminal" && osIndex === 0)
+    label = "MS-DOS Prompt";
 
   // --- Grid & Positioning ---
   const GRID_SIZE_X = 90;
