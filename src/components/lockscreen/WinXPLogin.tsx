@@ -1,37 +1,58 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../state/AppContext";
 
 export default function WinXPLogin({ onUnlock }: { onUnlock: () => void }) {
   const { dispatch } = useAppContext();
 
+  const [showStartup, setShowStartup] = useState(true);
+
   useEffect(() => {
-    const startupSound = new Audio("/assets/winxp/winxp.mp3");
-    const playPromise = startupSound.play();
+    let unlockTimer: ReturnType<typeof setTimeout>;
+    let startupSound: HTMLAudioElement;
 
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {});
-    }
+    const startupTimer = setTimeout(() => {
+      setShowStartup(false);
 
-    // Show the welcome screen for 4 seconds before advancing
-    const timer = setTimeout(() => {
-      dispatch({ type: "LOG_IN" });
-      localStorage.setItem("nostro_logged_in", "true");
-      onUnlock();
-    }, 4000);
+      startupSound = new Audio("/assets/winxp/winxp.mp3");
+      const playPromise = startupSound.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+
+      unlockTimer = setTimeout(() => {
+        dispatch({ type: "LOG_IN" });
+        localStorage.setItem("nostro_logged_in", "true");
+        onUnlock();
+      }, 4000);
+    }, 3500);
 
     return () => {
-      clearTimeout(timer);
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
+      clearTimeout(startupTimer);
+      clearTimeout(unlockTimer);
+      if (startupSound) {
+        const playPromise = startupSound.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => startupSound.pause()).catch(() => {});
+        } else {
             startupSound.pause();
-          })
-          .catch(() => {});
+        }
       }
     };
   }, [dispatch, onUnlock]);
+
+  if (showStartup) {
+    return (
+      <div className="h-screen w-screen bg-black flex items-center justify-center cursor-none">
+        <img
+          src="/assets/winxp/startup.gif"
+          alt="Windows XP Startup"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden select-none cursor-none bg-[#5a7edc]">

@@ -447,100 +447,123 @@ export const WinXPStartMenu = ({
           Administrator
         </span>
       </div>
-      <div className="flex h-[380px] bg-white border-t border-[#003c74]">
+      <div className="flex h-[420px] bg-white border-t border-[#003c74]">
         <div className="flex-1 flex flex-col py-2 bg-white">
           <div className="px-2 space-y-1">
             <button className="w-full flex items-center gap-2 p-2 hover:bg-[#2f71cd] hover:text-white rounded transition-colors group text-left">
-              <Icons.Browser />
+              <img src="/assets/winxp/icons/internet.ico" alt="Internet" className="w-8 h-8 object-contain drop-shadow" />
               <div className="flex flex-col">
-                <span className="font-bold text-sm text-gray-800 group-hover:text-white">
-                  Internet
-                </span>
-                <span className="text-xs text-gray-500 group-hover:text-blue-200">
-                  Internet Explorer
-                </span>
+                <span className="font-bold text-sm text-gray-800 group-hover:text-white leading-tight">Internet</span>
+                <span className="text-[11px] text-gray-500 group-hover:text-blue-200">Internet Explorer</span>
               </div>
             </button>
             <button className="w-full flex items-center gap-2 p-2 hover:bg-[#2f71cd] hover:text-white rounded transition-colors group text-left">
-              <Icons.Default />
+              <img src="/assets/winxp/icons/mail.ico" alt="E-mail" className="w-8 h-8 object-contain drop-shadow" />
               <div className="flex flex-col">
-                <span className="font-bold text-sm text-gray-800 group-hover:text-white">
-                  E-mail
-                </span>
-                <span className="text-xs text-gray-500 group-hover:text-blue-200">
-                  Outlook Express
-                </span>
+                <span className="font-bold text-sm text-gray-800 group-hover:text-white leading-tight">E-mail</span>
+                <span className="text-[11px] text-gray-500 group-hover:text-blue-200">Outlook Express</span>
               </div>
             </button>
           </div>
-          <div className="my-2 mx-2 border-t border-gray-200" />
-          <div className="px-2 space-y-1">
-            <button
-              onClick={() => handleLaunch("wnd-notepad")}
-              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
-            >
-              <Icons.App color="#2f71cd" />
-              <span className="text-sm text-gray-800 hover:text-white">
-                Notepad
-              </span>
-            </button>
+          <div className="my-1.5 mx-2 border-t border-[rgba(0,0,0,0.1)] opacity-50" />
+          <div className="px-2 space-y-0.5">
             <button
               onClick={() => handleLaunch("wnd-terminal")}
-              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+              className="w-full flex items-center gap-2 p-1.5 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
             >
-              <Icons.App color="#333" />
-              <span className="text-sm text-gray-800 hover:text-white">
-                Command Prompt
-              </span>
+              <img src="/assets/winxp/icons/command_prompt.ico" className="w-6 h-6 object-contain drop-shadow-sm" />
+              <span className="text-[12px] text-gray-800 hover:text-white">Command Prompt</span>
             </button>
             <button
-              onClick={() => handleLaunch("wnd-paint")}
-              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+              className="w-full flex items-center gap-2 p-1.5 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
             >
-              <Icons.App color="orange" />
-              <span className="text-sm text-gray-800 hover:text-white">
-                Paint
-              </span>
+              <img src="/assets/winxp/icons/msn.ico" className="w-6 h-6 object-contain drop-shadow-sm" />
+              <span className="text-[12px] text-gray-800 hover:text-white">MSN</span>
             </button>
             <button
               onClick={() => handleLaunch("wnd-media")}
-              className="w-full flex items-center gap-2 p-1 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+              className="w-full flex items-center gap-2 p-1.5 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
             >
-              <Icons.App color="#00cc6a" />
-              <span className="text-sm text-gray-800 hover:text-white">
-                Audio Player
-              </span>
+              <img src="/assets/winxp/icons/media.ico" className="w-6 h-6 object-contain drop-shadow-sm" />
+              <span className="text-[12px] text-gray-800 hover:text-white">Windows Media Player</span>
             </button>
+            <button
+              onClick={() => handleLaunch("wnd-paint")}
+              className="w-full flex items-center gap-2 p-1.5 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+            >
+              <img src="/assets/winxp/icons/paint.ico" className="w-6 h-6 object-contain drop-shadow-sm" />
+              <span className="text-[12px] text-gray-800 hover:text-white">Paint</span>
+            </button>
+            <button
+              onClick={() => handleLaunch("wnd-notepad")}
+              className="w-full flex items-center gap-2 p-1.5 hover:bg-[#2f71cd] hover:text-white rounded transition-colors text-left"
+            >
+              <img src="/assets/winxp/icons/notepad.ico" className="w-6 h-6 object-contain drop-shadow-sm" />
+              <span className="text-[12px] text-gray-800 hover:text-white">Notepad</span>
+            </button>
+            
           </div>
           <div className="mt-auto px-4 py-2 text-center">
             <button className="bg-white font-bold text-gray-700 text-sm hover:underline">
               All Programs
-              <span className="ml-2 inline-block w-0 h-0 border-l-[4px] border-l-green-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent align-middle" />
+              <span className="ml-[6px] inline-block w-0 h-0 border-l-[5px] border-l-green-600 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent align-middle" />
             </button>
           </div>
         </div>
-        <div className="w-[140px] bg-[#d3e5fa] border-l border-[#95bdee] py-2 text-sm text-[#001c57]">
-          <div className="space-y-1 px-1">
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span className="font-bold">My Documents</span>
+        <div className="w-[180px] bg-[#d3e5fa] border-l border-[#95bdee] py-2 text-[12px] text-[#001c57] font-semibold">
+          <div className="space-y-0.5 px-1">
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/documents.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="font-bold group-hover:text-white">My Documents</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span className="font-bold">My Pictures</span>
+            <button className="w-full flex items-center justify-between gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <div className="flex items-center gap-2">
+                <img src="/assets/winxp/icons/recent.ico" className="w-5 h-5 drop-shadow-sm" />
+                <span className="font-bold group-hover:text-white">My Recent Documents</span>
+              </div>
+              <span className="text-[10px] opacity-70">▶</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span className="font-bold">My Music</span>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/pictures.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="font-bold group-hover:text-white">My Pictures</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span className="font-bold">My Computer</span>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/music.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="font-bold group-hover:text-white">My Music</span>
+            </button>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/computer.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="font-bold group-hover:text-white">My Computer</span>
             </button>
           </div>
-          <div className="my-2 mx-2 border-t border-[#95bdee]" />
-          <div className="space-y-1 px-1">
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span>Control Panel</span>
+          <div className="my-1.5 mx-2 border-t border-[#95bdee]/50" />
+          <div className="space-y-0.5 px-1">
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/controlpanel.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57]">Control Panel</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left">
-              <span>Run...</span>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/set.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57] text-[11px] leading-tight flex-1">Set Program Access<br/>and Defaults</span>
+            </button>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/printers.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57]">Printers and Faxes</span>
+            </button>
+          </div>
+          <div className="my-1.5 mx-2 border-t border-[#95bdee]/50" />
+          <div className="space-y-0.5 px-1">
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/help.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57]">Help and Support</span>
+            </button>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/search.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57]">Search</span>
+            </button>
+            <button className="w-full flex items-center gap-2 px-2 py-1 hover:bg-[#2f71cd] hover:text-white transition-colors text-left group rounded-sm">
+              <img src="/assets/winxp/icons/run.ico" className="w-5 h-5 drop-shadow-sm" />
+              <span className="group-hover:text-white text-[#001c57]">Run...</span>
             </button>
           </div>
         </div>
